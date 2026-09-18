@@ -1,12 +1,11 @@
 import { Reveal } from "@/components/reveal";
+import { SectionTitle } from "@/components/section-title";
 
 export function Work() {
   return (
     <section id="work" className="px-6 py-24 sm:px-12">
       <Reveal>
-        <h1 className="text-[clamp(2.75rem,9vw,8rem)] leading-none font-extrabold tracking-tight text-zinc-950 dark:text-white">
-          Work
-        </h1>
+        <SectionTitle>Work</SectionTitle>
       </Reveal>
 
       <Reveal delay={0.1}>

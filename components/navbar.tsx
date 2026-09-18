@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -27,36 +26,49 @@ export function Navbar() {
   }, []);
 
   return (
-    <motion.header
-      layout
-      transition={{ duration: 0.3, ease: "easeInOut" }}
-      className={`fixed inset-x-0 z-50 mx-auto flex items-center justify-between ${
-        scrolled
-          ? "top-4 max-w-2xl gap-4 px-5 py-3"
-          : "top-0 max-w-none gap-0 px-6 py-4 sm:px-12"
-      }`}
-    >
-      <motion.div layout>
-        <Link href="#hero" className="font-display text-sm font-extrabold tracking-tight">
+    <header className="fixed inset-x-0 top-0 z-50">
+      {/* El morph a píldora es una transición CSS sobre max-width, padding y
+          margin. Antes lo hacía `layout` de framer-motion, que mide el DOM en
+          cada cruce de umbral para animar lo mismo.
+
+          max-w-[120rem] en vez de max-w-none porque `none` no interpola: la
+          anchura saltaría en seco. 120rem es mayor que cualquier viewport
+          razonable, así que se comporta igual que ancho completo. */}
+      <div
+        className={`mx-auto flex items-center justify-between gap-3 transition-[max-width,padding,margin] duration-300 ease-in-out sm:gap-4 ${
+          scrolled
+            ? "mt-4 max-w-2xl px-5 py-3"
+            : "mt-0 max-w-[120rem] px-4 py-4 sm:px-12"
+        }`}
+      >
+        <Link
+          href="#hero"
+          className="font-display text-sm font-extrabold tracking-tight"
+        >
           JI<span className="text-red-500">B</span>
         </Link>
-      </motion.div>
 
-      <motion.div layout className="flex items-center gap-4">
-        <ul className="flex items-center gap-8 text-xs font-medium tracking-[0.15em] text-zinc-600 uppercase dark:text-zinc-400">
-          {NAV_LINKS.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                className="transition-colors font-bold hover:text-zinc-950 dark:hover:text-white"
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-        <ThemeToggle />
-      </motion.div>
-    </motion.header>
+        <nav
+          aria-label="Main"
+          className="flex items-center gap-3 sm:gap-4"
+        >
+          {/* gap y tamaño reducidos por debajo de sm: con gap-8 fijo, a 390px
+              los enlaces desbordaban y se pegaban al logo. */}
+          <ul className="flex items-center gap-4 text-[11px] font-medium tracking-[0.15em] text-zinc-600 uppercase sm:gap-8 sm:text-xs dark:text-zinc-400">
+            {NAV_LINKS.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="font-bold transition-colors hover:text-zinc-950 dark:hover:text-white"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <ThemeToggle />
+        </nav>
+      </div>
+    </header>
   );
 }

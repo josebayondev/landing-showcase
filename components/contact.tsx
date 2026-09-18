@@ -1,30 +1,34 @@
 import { Reveal } from "@/components/reveal";
+import { SectionTitle } from "@/components/section-title";
+import { SOCIAL_LINKS } from "@/lib/site";
 
 const LINKS = [
-  { label: "Email", href: "mailto:josebayondev@gmail.com" },
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/josebayondev/" },
-  { label: "GitHub", href: "https://github.com/josebayondev" },
+  { label: "Email", href: `mailto:${SOCIAL_LINKS.email}` },
+  { label: "LinkedIn", href: SOCIAL_LINKS.linkedin },
+  { label: "GitHub", href: SOCIAL_LINKS.github },
 ];
 
 export function Contact() {
   return (
     <section id="contact" className="px-6 py-24 sm:px-12">
-
       <Reveal delay={0.1}>
-        <h1 className="mt-4 text-[clamp(2.75rem,9vw,8rem)] leading-none font-extrabold tracking-tight text-zinc-950 dark:text-white">
-          <a href="mailto:josebayondev@gmail.com" className="group inline-block">
+        <SectionTitle className="mt-4">
+          <a
+            href={`mailto:${SOCIAL_LINKS.email}`}
+            className="group inline-block"
+          >
             Let&apos;s talk{" "}
             <span className="inline-block transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-red-500">
               ↗
             </span>
           </a>
-        </h1>
+        </SectionTitle>
       </Reveal>
 
       <Reveal delay={0.15}>
         <div className="mt-16 flex flex-wrap items-end justify-between gap-8">
           <div className="font-mono text-sm text-zinc-600 dark:text-zinc-400">
-            <p>josebayondev@gmail.com</p>
+            <p>{SOCIAL_LINKS.email}</p>
             <p>Madrid, Spain</p>
           </div>
 
@@ -43,12 +47,6 @@ export function Contact() {
             ))}
           </ul>
         </div>
-      </Reveal>
-
-      <Reveal delay={0.2}>
-        <p className="mt-24 border-t border-black/10 pt-8 text-center font-mono text-xs text-zinc-500 dark:border-white/10 dark:text-zinc-400">
-          © 2026 Jose Ignacio Bayón · Software Developer
-        </p>
       </Reveal>
     </section>
   );

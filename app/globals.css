@@ -22,16 +22,11 @@
   --animate-marquee: marquee 32s linear infinite;
 }
 
-/* El track del marquee (components/marquee.tsx) duplica su contenido una vez
-   y se desplaza exactamente la mitad de su ancho: como las dos mitades son
-   idénticas, el bucle es perfecto y no se nota el corte. */
-@keyframes marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
+/* El navbar es fijo: sin scroll-padding, al saltar a #work o #about el título
+   de la sección queda escondido debajo de la barra. */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 7rem;
 }
 
 body {
@@ -48,4 +43,161 @@ h4,
 h5,
 h6 {
   font-family: var(--font-display);
+}
+
+/* El outline por defecto casi no se distingue sobre el fondo oscuro. Solo
+   :focus-visible, para no marcar el foco al hacer clic con el ratón. */
+:focus-visible {
+  outline: 2px solid var(--color-red-500);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* El track del marquee (components/marquee.tsx) duplica su contenido una vez
+   y se desplaza exactamente la mitad de su ancho: como las dos mitades son
+   idénticas, el bucle es perfecto y no se nota el corte. */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Animaciones de entrada
+
+   Todas cuelgan de `html.js`, la clase que pone components/theme-script.tsx
+   antes del primer pintado. Sin JavaScript no se aplica ninguna y el
+   contenido se ve tal cual, en vez de quedarse en opacity 0 esperando a un
+   script que no va a llegar (era el caso con framer-motion: el HTML servido
+   traía style="opacity:0" en cada bloque).
+   ───────────────────────────────────────────────────────────────────────── */
+
+@keyframes enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(56px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes enter-down {
+  from {
+    opacity: 0;
+    transform: translateY(-56px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes enter-left {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes enter-right {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes enter-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* `both` deja aplicado el fotograma inicial durante el animation-delay: sin
+   él, los elementos con retardo parpadean visibles antes de empezar. */
+html.js .enter {
+  animation: enter-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+html.js .enter-up {
+  animation-name: enter-up;
+}
+
+html.js .enter-down {
+  animation-name: enter-down;
+}
+
+html.js .enter-left {
+  animation-name: enter-left;
+}
+
+html.js .enter-right {
+  animation-name: enter-right;
+}
+
+/* El nombre del hero: entrada más larga y con una curva menos brusca que el
+   resto de la secuencia, porque es lo primero que se mira. */
+html.js .enter-name {
+  animation-duration: 0.8s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Scroll reveal de las secciones (components/reveal.tsx): el observer marca
+   data-revealed la primera vez que el bloque entra en el viewport. */
+html.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.6s ease-out,
+    transform 0.6s ease-out;
+}
+
+html.js [data-reveal][data-revealed] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Quien pide menos movimiento en el sistema ve la página entera, quieta: sin
+   marquee, sin entradas y sin scroll suave. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  html.js .enter,
+  html.js [data-reveal] {
+    animation: none;
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .animate-marquee {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

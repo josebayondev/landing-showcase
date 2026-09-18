@@ -1,26 +1,25 @@
 import { Reveal } from "@/components/reveal";
+import { SectionTitle } from "@/components/section-title";
 import { SKILLS } from "@/lib/skills";
 
 const JOBS = [
-    {
+  {
     company: "Independent Projects",
-    role: "Full-Stack Developer",
+    role: "Product Builder",
     period: "2026 — Present",
   },
   {
     company: "Grupo SIC (IA)",
     role: "Full-Stack Developer",
     period: "Sep 2025 — Present",
-  }
+  },
 ];
 
 export function About() {
   return (
     <section id="about" className="px-6 py-24 sm:px-12">
       <Reveal>
-        <h1 className="text-[clamp(2.75rem,9vw,8rem)] leading-none font-extrabold tracking-tight text-zinc-950 dark:text-white">
-          About
-        </h1>
+        <SectionTitle>About</SectionTitle>
       </Reveal>
 
       <Reveal delay={0.1}>
@@ -61,9 +60,9 @@ export function About() {
 
       <Reveal delay={0.15}>
         <div className="mt-16">
-          <p className="font-display text-sm font-semibold tracking-[0.3em] text-zinc-500 uppercase dark:text-zinc-400">
+          <h3 className="font-display text-sm font-semibold tracking-[0.3em] text-zinc-500 uppercase dark:text-zinc-400">
             Skills
-          </p>
+          </h3>
           <div className="mt-4 flex flex-wrap gap-2">
             {SKILLS.map((skill) => (
               <span
