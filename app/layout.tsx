@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Syne } from "next/font/google";
 import "./globals.css";
 
 import { Navbar } from "@/components/navbar";
+import { ScrollBlur } from "@/components/scroll-blur";
 import { ScrollIndicator } from "@/components/scroll-indicator";
 import { ThemeScript } from "@/components/theme-script";
 
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ThemeScript />
       </head>
       <body className="min-h-full flex flex-col">
+        <ScrollBlur />
         <Navbar />
         <ScrollIndicator />
         {children}
