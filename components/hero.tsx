@@ -20,7 +20,7 @@ export function Hero() {
   return (
     <section
       id="hero"
-      className="relative flex min-h-[calc(100dvh-6rem)] flex-col items-start justify-center gap-4 px-6 text-left sm:px-12"
+      className="relative flex min-h-[calc(100dvh-6rem)] flex-col items-start justify-center gap-4 px-6 pt-32 text-left sm:px-12"
     >
       {/* El nombre entra primero: "Jose Ignacio" cae desde arriba, "Bayón"
           sube desde abajo, casi a la vez, despacio (1.8s). El resto del hero
@@ -37,7 +37,7 @@ export function Hero() {
 
       {/* Líneas fijas en vez de text-balance: alineado a la izquierda no
           necesitamos que el navegador decida dónde cortar. */}
-      <h1 className="text-[clamp(2.75rem,9vw,7.5rem)] leading-none font-extrabold tracking-tight text-zinc-950 dark:text-white">
+      <h1 className="text-[clamp(2.75rem,9vw,8rem)] leading-none font-extrabold tracking-tight text-zinc-950 dark:text-white">
         <motion.span
           initial={{ opacity: 0, y: -56 }}
           animate={{ opacity: 1, y: 0 }}
@@ -56,14 +56,28 @@ export function Hero() {
         </motion.span>
       </h1>
 
-      <div className="absolute right-6 bottom-6 flex flex-col items-end gap-2">
+      <motion.p
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 1.7, ease: ENTRANCE_EASE }}
+        className="mt-8 max-w-md font-mono text-sm text-zinc-600 sm:max-w-lg sm:text-base dark:text-zinc-400"
+      >
+        Madrid raised, Murcia based. Tech dev who cares as much about
+        pixel-perfect frontend as about backend that scales.
+      </motion.p>
+
+      <div className="absolute right-6 bottom-1 flex flex-col items-end gap-2">
         {BADGES.map((badge) => (
           <motion.span
             key={badge.label}
             initial={{ opacity: 0, x: 32 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: badge.delay, ease: ENTRANCE_EASE }}
-            className="flex items-center gap-1.5 rounded-full border border-black/10 px-3 py-1.5 text-[11px] font-medium tracking-wide text-zinc-600 uppercase dark:border-white/10 dark:text-zinc-400"
+            className={`flex items-center gap-1.5 rounded-full border border-black/10 px-3 py-1.5 text-[11px] font-medium tracking-wide uppercase dark:border-white/10 ${
+              badge.dot
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-zinc-600 dark:text-zinc-400"
+            }`}
           >
             {badge.dot && (
               <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden />
