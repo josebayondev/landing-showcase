@@ -37,18 +37,18 @@ export function Navbar() {
       }`}
     >
       <motion.div layout>
-        <Link href="#hero" className="text-sm font-bold tracking-tight">
-          JIB
+        <Link href="#hero" className="font-display text-sm font-extrabold tracking-tight">
+          JI<span className="text-red-500">B</span>
         </Link>
       </motion.div>
 
       <motion.div layout className="flex items-center gap-4">
-        <ul className="flex items-center gap-6 text-xs font-medium tracking-wide text-zinc-600 uppercase dark:text-zinc-400">
+        <ul className="flex items-center gap-8 text-xs font-medium tracking-[0.15em] text-zinc-600 uppercase dark:text-zinc-400">
           {NAV_LINKS.map((link) => (
             <li key={link.href}>
               <Link
                 href={link.href}
-                className="transition-colors hover:text-zinc-950 dark:hover:text-white"
+                className="transition-colors font-bold hover:text-zinc-950 dark:hover:text-white"
               >
                 {link.label}
               </Link>
