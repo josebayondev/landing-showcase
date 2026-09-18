@@ -19,6 +19,19 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-syne);
+  --animate-marquee: marquee 32s linear infinite;
+}
+
+/* El track del marquee (components/marquee.tsx) duplica su contenido una vez
+   y se desplaza exactamente la mitad de su ancho: como las dos mitades son
+   idénticas, el bucle es perfecto y no se nota el corte. */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 body {
