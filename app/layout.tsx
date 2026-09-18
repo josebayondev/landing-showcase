@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Syne } from "next/font/google";
 import "./globals.css";
 
 import { Navbar } from "@/components/navbar";
+import { ScrollIndicator } from "@/components/scroll-indicator";
 import { ThemeScript } from "@/components/theme-script";
 
 const geistSans = Geist({
@@ -15,9 +16,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Fuente variable para titulares (h1-h6), estilo geométrico y expresivo
+const syne = Syne({
+  variable: "--font-syne",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
-  title: "Jose Ignacio Bayon — Software Engineer",
-  description: "Portfolio de Jose Ignacio Bayon, Software Engineer.",
+  title: "Jose Ignacio Bayón — Software Developer",
+  description: "Portfolio de Jose Ignacio Bayón, Software Developer.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -25,13 +32,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${syne.variable} h-full antialiased`}
     >
       <head>
         <ThemeScript />
       </head>
       <body className="min-h-full flex flex-col">
         <Navbar />
+        <ScrollIndicator />
         {children}
       </body>
     </html>
