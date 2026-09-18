@@ -31,7 +31,9 @@ export function Navbar() {
       layout
       transition={{ duration: 0.3, ease: "easeInOut" }}
       className={`fixed inset-x-0 z-50 mx-auto flex items-center justify-between ${
-        scrolled ? "top-4 max-w-2xl gap-4 px-5 py-3" : "top-0 max-w-5xl gap-0 px-6 py-4"
+        scrolled
+          ? "top-4 max-w-2xl gap-4 px-5 py-3"
+          : "top-0 max-w-none gap-0 px-6 py-4 sm:px-12"
       }`}
     >
       <motion.div layout>
