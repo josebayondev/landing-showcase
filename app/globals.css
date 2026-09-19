@@ -131,9 +131,16 @@ h6 {
 }
 
 /* `both` deja aplicado el fotograma inicial durante el animation-delay: sin
-   él, los elementos con retardo parpadean visibles antes de empezar. */
+   él, los elementos con retardo parpadean visibles antes de empezar.
+
+   El retardo se parte en dos: `--enter-delay` es el escalonado propio de cada
+   elemento (lo pone el componente) y `--enter-offset` es la espera común a
+   toda la secuencia, que existe para que la entrada no ocurra detrás de la
+   cortina de carga. La declaración va DESPUÉS del atajo `animation`, que si no
+   resetearía animation-delay a 0. */
 html.js .enter {
   animation: enter-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--enter-offset, 0s) + var(--enter-delay, 0s));
 }
 
 html.js .enter-up {
@@ -174,6 +181,189 @@ html.js [data-reveal][data-revealed] {
   transform: none;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────
+   Cortina de carga (components/preloader.tsx)
+
+   Secuencia completa de 2.05s, toda en CSS: el nombre entra recortado por una
+   máscara (0 → 0.2s), la barra roja se llena (0.2 → 1.5s), el nombre sale por
+   arriba (1.5 → 1.72s) y la cortina se retira hacia arriba con un clip-path
+   (1.72 → 2.05s). Los porcentajes de cada keyframe están calculados sobre esos
+   2.05s para que las tres animaciones encajen sin depender unas de otras.
+
+   `display: none` por defecto y visible solo bajo `html.js`: sin JavaScript no
+   aparece la cortina y la web se ve directamente, nunca una pantalla opaca
+   esperando a un script que no va a llegar.
+
+   Contrapartida conocida: dos segundos de cortina opaca retrasan el LCP.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.preloader {
+  display: none;
+}
+
+html.js .preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  background: var(--background);
+  /* Nunca captura clics, ni siquiera mientras cubre la página: así no deja
+     nada atrapado detrás ni intercepta nada una vez se ha retirado. */
+  pointer-events: none;
+  animation: preloader-lift 2.05s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+
+html.js .preloader-name {
+  display: block;
+  overflow: hidden;
+}
+
+html.js .preloader-name-inner {
+  display: block;
+  animation: preloader-name 2.05s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+html.js .preloader-bar {
+  width: min(180px, 42vw);
+  height: 2px;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--foreground) 14%, transparent);
+}
+
+html.js .preloader-bar-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  background: var(--color-red-500);
+  animation: preloader-bar 2.05s linear both;
+}
+
+/* 110% y no 100%: deja margen para tildes y descendentes, que con 100% asoman
+   por el borde de la máscara. */
+@keyframes preloader-name {
+  0% {
+    transform: translateY(110%);
+  }
+
+  10% {
+    transform: translateY(0);
+  }
+
+  73% {
+    transform: translateY(0);
+  }
+
+  84% {
+    transform: translateY(-110%);
+  }
+
+  100% {
+    transform: translateY(-110%);
+  }
+}
+
+@keyframes preloader-bar {
+  0%,
+  10% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+
+  73% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+
+  82%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+/* inset(0 0 100% 0): el recorte se cierra contra el borde superior, así que la
+   página se descubre de abajo arriba, como una persiana que sube. */
+@keyframes preloader-lift {
+  0%,
+  84% {
+    clip-path: inset(0 0 0 0);
+    visibility: visible;
+  }
+
+  100% {
+    clip-path: inset(0 0 100% 0);
+    visibility: hidden;
+  }
+}
+
+/* La entrada del hero espera a que la cortina levante; si no, ocurriría entera
+   por detrás y no se vería. */
+html.js {
+  --enter-offset: 1.78s;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Animaciones ligadas al scroll (CSS scroll-driven)
+
+   Van con `animation-timeline`, que hoy cubre ~87% de los navegadores
+   (Chrome/Edge 115+, Opera 101+, Safari 26+, Firefox 156+). Por eso todo lo
+   que arranca atenuado vive dentro de `@supports`: quien no lo soporte ve el
+   contenido a opacidad normal y quieto, nunca un hueco en blanco.
+
+   Cuelgan de `html.js` por coherencia con el resto del fichero, aunque estas
+   no necesiten JavaScript para funcionar: el navegador las mueve solo.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* El hero se aparta un poco más rápido que el scroll y se apaga al salir. La
+   opacidad aguanta hasta el 45% del recorrido para que el nombre no se vea
+   lavado mientras todavía es lo principal en pantalla. */
+@keyframes hero-exit {
+  0% {
+    opacity: 1;
+    transform: none;
+  }
+
+  45% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-18%);
+  }
+}
+
+@keyframes word-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  /* scroll() en vez de view(): el hero arranca pegado al origen del documento,
+     y medir sobre el scroll de la raíz da un recorrido predecible —la primera
+     pantalla— en lugar de depender de cuánto asoma el propio bloque. */
+  html.js .hero-scroll {
+    animation: hero-exit linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 100vh;
+  }
+
+  /* components/scroll-text.tsx. 0.2 y no 0: la palabra que todavía no ha
+     entrado se intuye, así el párrafo no parece cortado a media frase. */
+  html.js [data-scroll-text] > span {
+    opacity: 0.2;
+    animation: word-in linear both;
+    animation-timeline: view();
+    animation-range: cover 20% cover 45%;
+  }
+}
+
 /* Quien pide menos movimiento en el sistema ve la página entera, quieta: sin
    marquee, sin entradas y sin scroll suave. */
 @media (prefers-reduced-motion: reduce) {
@@ -181,8 +371,20 @@ html.js [data-reveal][data-revealed] {
     scroll-behavior: auto;
   }
 
+  /* Sin cortina, y el hero recupera su entrada sin la espera que la cortina
+     justificaba. */
+  html.js .preloader {
+    display: none;
+  }
+
+  html.js {
+    --enter-offset: 0s;
+  }
+
   html.js .enter,
-  html.js [data-reveal] {
+  html.js [data-reveal],
+  html.js .hero-scroll,
+  html.js [data-scroll-text] > span {
     animation: none;
     transition: none;
     opacity: 1;

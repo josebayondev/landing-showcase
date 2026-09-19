@@ -84,8 +84,42 @@ framer-motion el HTML que salía del servidor traía `style="opacity:0"` en cada
 JS la página era un rectángulo vacío y el LCP esperaba a la hidratación. Cualquier animación nueva que empiece
 en estado invisible debe seguir la misma regla.
 
-`@media (prefers-reduced-motion: reduce)` desactiva marquee, entradas, reveals y scroll suave. Hay que
-mantenerlo al añadir animaciones.
+Antes de todo eso está la **cortina de carga** (`components/preloader.tsx`), otra secuencia de CSS puro de
+2.05s: el nombre entra recortado por una máscara, la barra roja se llena y la cortina se retira hacia arriba
+con `clip-path`. Dos consecuencias que hay que tener presentes al tocarla:
+
+- La cortina está en `display: none` por defecto y solo se muestra bajo `html.js`. Es la regla del proyecto
+  aplicada al revés: si el script no llega, en vez de quedarse una pantalla opaca tapando la web, no hay
+  cortina y la página se ve directa.
+- La entrada del hero tiene que esperarla, o pasaría entera por detrás. Por eso `.enter` usa
+  `animation-delay: calc(var(--enter-offset, 0s) + var(--enter-delay, 0s))`: `--enter-delay` es el escalonado
+  de cada elemento (lo pone `hero.tsx` en el `style`, ya no `animationDelay`) y `--enter-offset` es la espera
+  común, definida en `html.js` y puesta a `0s` en `prefers-reduced-motion`. Al cambiar la duración de la
+  cortina hay que mover también ese offset.
+
+Contrapartida asumida a propósito: dos segundos de cortina opaca retrasan el LCP, justo la métrica por la
+que se migró desde framer-motion. Fue una decisión consciente de Jose, no un descuido.
+
+Hay además una segunda capa, **ligada al scroll** y también en `app/globals.css`, que usa
+`animation-timeline` (CSS scroll-driven, sin JavaScript):
+
+- `.hero-scroll` en la sección del hero: se aparta un poco más rápido que el scroll y se apaga al salir.
+  Va sobre `scroll(root block)` y no sobre `view()` porque el hero arranca pegado al origen del documento,
+  así el recorrido es la primera pantalla y no depende de cuánto asoma el bloque. La clase va en la propia
+  `<section>`: las clases `.enter` están en los descendientes, así que no compiten por el mismo elemento, y
+  envolver los hijos rompería el flex y la posición absoluta de los badges.
+- `[data-scroll-text] > span` para `components/scroll-text.tsx`, que parte un párrafo en palabras. Cada
+  `<span>` tiene su propia `view()` timeline, así que se enciende según su posición: las palabras de una
+  misma línea comparten altura y entran juntas, con lo que se lee **línea a línea**. No hay retardos
+  calculados ni componente cliente.
+
+`animation-timeline` cubre ~87% de los navegadores (Chrome/Edge 115+, Opera 101+, Safari 26+, Firefox 156+),
+así que **todo lo que arranque atenuado va dentro de `@supports (animation-timeline: view())`**. Quien no lo
+soporte ve el contenido a opacidad normal y quieto — la misma regla que el gate `html.js`, por el mismo
+motivo: nada puede quedarse invisible esperando algo que no va a llegar.
+
+`@media (prefers-reduced-motion: reduce)` desactiva marquee, entradas, reveals, el parallax del hero y el
+revelado por scroll, además del scroll suave. Hay que mantenerlo al añadir animaciones.
 
 Tras esta migración **framer-motion ya no se importa en ningún sitio**; sigue en `package.json` por si vuelve
 a hacer falta, pero se puede desinstalar.

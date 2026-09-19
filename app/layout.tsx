@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
+import { Preloader } from "@/components/preloader";
 import { ScrollBlur } from "@/components/scroll-blur";
 import { ScrollIndicator } from "@/components/scroll-indicator";
 import { ThemeScript } from "@/components/theme-script";
@@ -104,6 +105,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
+
+        {/* Después del skip link, que tiene que seguir siendo el primer
+            elemento tabulable del body. */}
+        <Preloader />
 
         <ScrollBlur />
         <Navbar />

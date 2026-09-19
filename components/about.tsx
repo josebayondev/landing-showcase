@@ -1,6 +1,12 @@
 import { Reveal } from "@/components/reveal";
+import { ScrollText } from "@/components/scroll-text";
 import { SectionTitle } from "@/components/section-title";
 import { SKILLS } from "@/lib/skills";
+
+// Fuera del JSX para poder partirlo en palabras en ScrollText. Sin `&apos;`:
+// aquí es una cadena de JavaScript, no texto JSX.
+const BIO =
+  "I'm drawn to everything AI — how fast it's moving, and everything we're about to be able to build with it. That's where I want to put my energy: turning what's becoming possible into what actually ships.";
 
 const JOBS = [
   {
@@ -27,14 +33,10 @@ export function About() {
       </Reveal>
 
       <div className="mt-12 grid gap-12 md:grid-cols-2 md:gap-16">
-        <Reveal>
-          <p className="max-w-md font-mono text-sm text-zinc-600 sm:text-base dark:text-zinc-400">
-            I&apos;m drawn to everything AI — how fast it&apos;s moving, and
-            everything we&apos;re about to be able to build with it.
-            That&apos;s where I want to put my energy: turning what&apos;s
-            becoming possible into what actually ships.
-          </p>
-        </Reveal>
+        <ScrollText
+          text={BIO}
+          className="max-w-md font-mono text-sm text-zinc-600 sm:text-base dark:text-zinc-400"
+        />
 
         <Reveal delay={0.1}>
           <ul className="flex flex-col gap-6">
