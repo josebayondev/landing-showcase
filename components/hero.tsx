@@ -23,6 +23,12 @@ const BADGES = [
 // `.enter` los suma a `--enter-offset`, la espera común mientras la cortina de
 // carga está delante (globals.css). Con `animationDelay` inline no habría
 // forma de sumar las dos cosas.
+//
+// `hero-line-scroll-1/2` (globals.css) es aparte de todo lo anterior: el
+// nombre ya está visible al cargar, esto es solo lo que pasa después, al
+// hacer scroll. Cada línea tiene su propio rango sobre el scroll del
+// documento, desfasado a propósito, para que "Jose Ignacio" reaccione y se
+// vaya antes que "Bayón" en vez de moverse las dos línea a la vez.
 export function Hero() {
   return (
     <section
@@ -39,9 +45,11 @@ export function Hero() {
       {/* Líneas fijas en vez de text-balance: alineado a la izquierda no
           necesitamos que el navegador decida dónde cortar. */}
       <h1 className="text-[clamp(2.75rem,9vw,8rem)] leading-none font-extrabold tracking-tight text-zinc-950 dark:text-white">
-        <span className="enter enter-down enter-name block">Jose Ignacio</span>
+        <span className="enter enter-down enter-name hero-line-scroll-1 block">
+          Jose Ignacio
+        </span>
         <span
-          className="enter enter-up enter-name block"
+          className="enter enter-up enter-name hero-line-scroll-2 block"
           style={{ "--enter-delay": "0.08s" } as CSSProperties}
         >
           Bay<span className="text-red-500">ó</span>n

@@ -344,6 +344,29 @@ html.js {
   }
 }
 
+/* components/hero.tsx: cada línea del nombre escala y sube por su cuenta,
+   por encima del hero-exit del <section>. transform-origin a la izquierda
+   porque el texto está alineado a la izquierda: si escalase desde el centro
+   se saldría también por la izquierda, contra el padding. */
+@keyframes hero-line-scroll {
+  to {
+    transform: scale(1.08) translateY(-10%);
+  }
+}
+
+/* components/section-title.tsx: mismo lenguaje que el nombre del hero (con
+   el que comparte tamaño y peso), pero al revés —entra grande y se asienta—
+   porque aquí no hay cortina que ya lo haya mostrado: el <Reveal> que envuelve
+   el título hace el fade, esto solo el asentado de escala. */
+@keyframes title-settle {
+  from {
+    transform: scale(1.05);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
 @supports (animation-timeline: view()) {
   /* scroll() en vez de view(): el hero arranca pegado al origen del documento,
      y medir sobre el scroll de la raíz da un recorrido predecible —la primera
@@ -361,6 +384,32 @@ html.js {
     animation: word-in linear both;
     animation-timeline: view();
     animation-range: cover 20% cover 45%;
+  }
+
+  /* Rangos distintos por línea para que el scroll las separe en dos tiempos:
+     "Jose Ignacio" termina su recorrido antes que "Bayón" empiece a moverse
+     de verdad, así se lee como un efecto en cadena y no las dos a la vez. */
+  html.js .hero-line-scroll-1,
+  html.js .hero-line-scroll-2 {
+    transform-origin: left center;
+    animation: hero-line-scroll linear both;
+    animation-timeline: scroll(root block);
+  }
+
+  html.js .hero-line-scroll-1 {
+    animation-range: 0 60vh;
+  }
+
+  html.js .hero-line-scroll-2 {
+    animation-range: 15vh 90vh;
+  }
+
+  /* cover 0%/55% y no 0%/100%: se asienta a mitad de recorrido, mientras
+     todavía está entrando en pantalla, no cuando ya lleva rato visible. */
+  html.js .title-scroll {
+    animation: title-settle linear both;
+    animation-timeline: view();
+    animation-range: cover 0% cover 55%;
   }
 }
 
@@ -384,7 +433,10 @@ html.js {
   html.js .enter,
   html.js [data-reveal],
   html.js .hero-scroll,
-  html.js [data-scroll-text] > span {
+  html.js [data-scroll-text] > span,
+  html.js .hero-line-scroll-1,
+  html.js .hero-line-scroll-2,
+  html.js .title-scroll {
     animation: none;
     transition: none;
     opacity: 1;
