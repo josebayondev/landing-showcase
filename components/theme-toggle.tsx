@@ -15,8 +15,8 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggleTheme}
-      aria-label="Toggle theme"
-      className="flex items-center gap-1.5 rounded-full border border-black/10 px-3 py-1.5 text-xs font-medium tracking-wide text-zinc-600 transition-colors hover:text-zinc-950 dark:border-white/10 dark:text-zinc-400 dark:hover:text-white"
+      aria-label="Cambiar tema"
+      className="flex items-center gap-1.5 rounded-full border border-black/10 px-3 py-1.5 text-[11px] font-medium tracking-wide text-zinc-600 transition-colors hover:text-zinc-950 dark:border-white/10 dark:text-zinc-400 dark:hover:text-white"
     >
       <span aria-hidden className="text-sm leading-none">
         <span className="dark:hidden">☀</span>
@@ -25,8 +25,8 @@ export function ThemeToggle() {
       {/* El texto se oculta en móvil: son ~45px que el navbar necesita para
           que los tres enlaces y el logo no se toquen a 390px. */}
       <span className="hidden sm:inline">
-        <span className="dark:hidden">LIGHT</span>
-        <span className="hidden dark:inline">DARK</span>
+        <span className="dark:hidden">CLARO</span>
+        <span className="hidden dark:inline">OSCURO</span>
       </span>
     </button>
   );

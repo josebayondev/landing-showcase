@@ -5,7 +5,7 @@ export function Work() {
   return (
     <section id="work" className="px-6 py-24 sm:px-12">
       <Reveal>
-        <SectionTitle>Work</SectionTitle>
+        <SectionTitle>Proyectos</SectionTitle>
       </Reveal>
 
       <Reveal delay={0.1}>
@@ -13,8 +13,8 @@ export function Work() {
       </Reveal>
 
       <Reveal delay={0.15}>
-        <p className="mt-8 font-mono text-sm text-zinc-500 dark:text-zinc-400">
-          Selected work — coming soon.
+        <p className="mt-8 font-mono text-xs text-zinc-500 dark:text-zinc-400">
+          Trabajos seleccionados — próximamente.
         </p>
       </Reveal>
     </section>

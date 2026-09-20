@@ -16,9 +16,10 @@ export const SITE_NAME = "Jose Ignacio Bayón";
 
 export const SITE_TITLE = "Jose Ignacio Bayón — Software Developer";
 
-// El copy visible va en inglés, igual que el resto de la web.
+// El copy visible va en español; "Software Developer" se queda en inglés a
+// propósito, igual que en el resto de la web (ver CLAUDE.md).
 export const SITE_DESCRIPTION =
-  "Software developer. Madrid raised, Murcia based. I care as much about pixel-perfect frontend as about backend that scales.";
+  "Software Developer entre Madrid y Murcia, centrado en frontend y diseño UI/UX, sin perder de vista un backend sólido y que escale.";
 
 export const SOCIAL_LINKS = {
   linkedin: "https://www.linkedin.com/in/josebayondev/",

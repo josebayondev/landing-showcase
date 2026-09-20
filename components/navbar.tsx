@@ -6,9 +6,9 @@ import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const NAV_LINKS = [
-  { href: "#work", label: "Work" },
-  { href: "#about", label: "About" },
-  { href: "#contact", label: "Contact" },
+  { href: "#work", label: "Proyectos" },
+  { href: "#about", label: "Sobre mí" },
+  { href: "#contact", label: "Contacto" },
 ];
 
 export function Navbar() {
@@ -43,18 +43,18 @@ export function Navbar() {
       >
         <Link
           href="#hero"
-          className="font-display text-sm font-extrabold tracking-tight"
+          className="font-display text-xs font-extrabold tracking-tight"
         >
           JI<span className="text-red-500">B</span>
         </Link>
 
         <nav
-          aria-label="Main"
+          aria-label="Principal"
           className="flex items-center gap-3 sm:gap-4"
         >
           {/* gap y tamaño reducidos por debajo de sm: con gap-8 fijo, a 390px
               los enlaces desbordaban y se pegaban al logo. */}
-          <ul className="flex items-center gap-4 text-[11px] font-medium tracking-[0.15em] text-zinc-600 uppercase sm:gap-8 sm:text-xs dark:text-zinc-400">
+          <ul className="flex items-center gap-4 text-[10px] font-medium tracking-[0.15em] text-zinc-600 uppercase sm:gap-8 sm:text-[11px] dark:text-zinc-400">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
                 <Link

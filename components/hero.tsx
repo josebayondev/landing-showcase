@@ -1,8 +1,8 @@
 import type { CSSProperties } from "react";
 
 const BADGES = [
-  { label: "Available for work", dot: true, delay: "0.72s" },
-  { label: "Madrid, Spain", dot: false, delay: "0.8s" },
+  { label: "Disponible para trabajar", dot: true, delay: "0.72s" },
+  { label: "Madrid, España", dot: false, delay: "0.8s" },
 ];
 
 // Server component: la entrada es CSS (clases .enter de globals.css), no hay
@@ -36,7 +36,7 @@ export function Hero() {
       className="hero-scroll relative flex min-h-[calc(100dvh-6rem)] flex-col items-start justify-center gap-4 px-6 pt-32 text-left sm:px-12"
     >
       <p
-        className="enter enter-left font-display text-sm font-semibold tracking-[0.3em] text-zinc-500 uppercase dark:text-zinc-400"
+        className="enter enter-left font-display text-xs font-semibold tracking-[0.3em] text-zinc-500 uppercase dark:text-zinc-400"
         style={{ "--enter-delay": "0.5s" } as CSSProperties}
       >
         Software Developer
@@ -57,11 +57,13 @@ export function Hero() {
       </h1>
 
       <p
-        className="enter mt-8 max-w-md font-mono text-sm text-zinc-600 sm:max-w-lg sm:text-base dark:text-zinc-400"
+        className="enter mt-8 max-w-md font-mono text-xs text-zinc-600 sm:max-w-lg sm:text-sm dark:text-zinc-400"
         style={{ "--enter-delay": "0.62s" } as CSSProperties}
       >
-        Madrid raised, Murcia based. Tech dev who cares as much about
-        pixel-perfect frontend as about backend that scales.
+        Entre Madrid y Murcia. Desarrollador centrado en el frontend y el
+        diseño UI/UX, con atención al detalle en cada interfaz que construyo,
+        también construyo backend y me aseguro que sea sólido, cargue rápido y
+        escale sin problemas.
       </p>
 
       <div className="absolute right-6 bottom-1 flex flex-col items-end gap-2">
@@ -69,7 +71,7 @@ export function Hero() {
           <span
             key={badge.label}
             style={{ "--enter-delay": badge.delay } as CSSProperties}
-            className={`enter enter-right flex items-center gap-1.5 rounded-full border border-black/10 px-3 py-1.5 text-[11px] font-medium tracking-wide uppercase dark:border-white/10 ${
+            className={`enter enter-right flex items-center gap-1.5 rounded-full border border-black/10 px-3 py-1.5 text-[10px] font-medium tracking-wide uppercase dark:border-white/10 ${
               badge.dot
                 ? // emerald-600 sobre blanco se queda en 3.77:1, por debajo de
                   // AA para 11px; el 700 sube a 5.1:1 sin cambiar el tono.

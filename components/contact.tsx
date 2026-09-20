@@ -3,7 +3,7 @@ import { SectionTitle } from "@/components/section-title";
 import { SOCIAL_LINKS } from "@/lib/site";
 
 const LINKS = [
-  { label: "Email", href: `mailto:${SOCIAL_LINKS.email}` },
+  { label: "Correo", href: `mailto:${SOCIAL_LINKS.email}` },
   { label: "LinkedIn", href: SOCIAL_LINKS.linkedin },
   { label: "GitHub", href: SOCIAL_LINKS.github },
 ];
@@ -17,7 +17,7 @@ export function Contact() {
             href={`mailto:${SOCIAL_LINKS.email}`}
             className="group inline-block"
           >
-            Let&apos;s talk{" "}
+            Hablemos{" "}
             <span className="inline-block transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-red-500">
               ↗
             </span>
@@ -27,12 +27,12 @@ export function Contact() {
 
       <Reveal delay={0.15}>
         <div className="mt-16 flex flex-wrap items-end justify-between gap-8">
-          <div className="font-mono text-sm text-zinc-600 dark:text-zinc-400">
+          <div className="font-mono text-xs text-zinc-600 dark:text-zinc-400">
             <p>{SOCIAL_LINKS.email}</p>
-            <p>Madrid, Spain</p>
+            <p>Madrid, España</p>
           </div>
 
-          <ul className="flex items-center gap-6 text-xs font-medium tracking-[0.15em] text-zinc-600 uppercase dark:text-zinc-400">
+          <ul className="flex items-center gap-6 text-[11px] font-medium tracking-[0.15em] text-zinc-600 uppercase dark:text-zinc-400">
             {LINKS.map((link) => (
               <li key={link.label}>
                 <a

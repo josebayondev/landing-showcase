@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   // hace falta declararla aquí, Next la inyecta en og:image y twitter:image.
   openGraph: {
     type: "website",
-    locale: "en_US",
+    locale: "es_ES",
     url: "/",
     siteName: SITE_NAME,
     title: SITE_TITLE,
@@ -85,7 +85,7 @@ const PERSON_JSON_LD = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang="es"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${syne.variable} h-full antialiased`}
     >
@@ -103,7 +103,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           href="#content"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-60 focus:rounded-full focus:border focus:border-black/10 focus:bg-background focus:px-4 focus:py-2 focus:text-sm focus:font-medium dark:focus:border-white/10"
         >
-          Skip to content
+          Saltar al contenido
         </a>
 
         {/* Después del skip link, que tiene que seguir siendo el primer

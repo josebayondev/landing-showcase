@@ -7,7 +7,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Reglas importantes
 
 - **Idioma**: código, comentarios, mensajes de commit y documentación (README, CLAUDE.md, etc.) van en
-  **español**. El copy visible en la propia web (nav, hero, badges...) va en **inglés** — ver más abajo.
+  **español**. El copy visible en la propia web (nav, hero, badges...) también va en **español**, con dos
+  excepciones a propósito: la etiqueta de rol "Software Developer" (hero, footer, metadata, JSON-LD), y los
+  puestos de `JOBS` en `components/about.tsx` (empresa, cargo, periodo), que van en inglés como en un CV.
 - **Git**: Claude solo ejecuta comandos de **consulta** (`git status`, `git log`, `git diff`, `git show`,
   `git blame`...). `git add`, `git commit`, `git push` y `git checkout` (o cualquier otro comando que
   modifique el working tree, el índice o el historial) los ejecuta **Jose**, nunca Claude. Si hace falta
@@ -140,7 +142,7 @@ a hacer falta, pero se puede desinstalar.
 ### Accesibilidad
 
 Cosas que hay que no romper al tocar el layout: el skip link es el primer elemento del `<body>`; las secciones
-viven dentro de `<main id="content">`; los enlaces del navbar van dentro de un `<nav aria-label="Main">`; el
+viven dentro de `<main id="content">`; los enlaces del navbar van dentro de un `<nav aria-label="Principal">`; el
 copyright es un `<footer>` propio; `scroll-padding-top: 7rem` en `html` evita que los anclajes dejen el título
 debajo del navbar fijo; y hay un `:focus-visible` propio (el outline por defecto casi no se ve sobre negro).
 

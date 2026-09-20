@@ -12,7 +12,7 @@ export function Marquee() {
       <div className="flex w-max animate-marquee py-3.5">
         {[...SKILLS, ...SKILLS].map((item, index) => (
           <span key={index} className="flex items-center whitespace-nowrap">
-            <span className="font-display text-xs font-semibold tracking-[0.3em] text-zinc-500 uppercase dark:text-zinc-400">
+            <span className="font-display text-[11px] font-semibold tracking-[0.3em] text-zinc-500 uppercase dark:text-zinc-400">
               {item}
             </span>
             <span className="mx-7 text-red-500">✦</span>
