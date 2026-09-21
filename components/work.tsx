@@ -1,5 +1,18 @@
+import { ProjectCard } from "@/components/project-card";
 import { Reveal } from "@/components/reveal";
 import { SectionTitle } from "@/components/section-title";
+
+const PROJECTS = [
+  {
+    meta: "josebayon.vercel.app · 2026",
+    title: "Conóceme un poco más",
+    tags: ["Programación", "IA"],
+    description:
+      "Blog personal donde hablo de programación, IA y de lo que voy aprendiendo por el camino.",
+    href: "https://josebayon.vercel.app",
+    glyph: "</>",
+  },
+];
 
 export function Work() {
   return (
@@ -12,11 +25,13 @@ export function Work() {
         <div className="mt-8 border-t border-black/10 dark:border-white/10" />
       </Reveal>
 
-      <Reveal delay={0.15}>
-        <p className="mt-8 font-mono text-xs text-zinc-500 dark:text-zinc-400">
-          Trabajos seleccionados — próximamente.
-        </p>
-      </Reveal>
+      <div className="mt-12 flex flex-col gap-6">
+        {PROJECTS.map((project, index) => (
+          <Reveal key={project.href} delay={0.15 + index * 0.05}>
+            <ProjectCard index={index + 1} {...project} />
+          </Reveal>
+        ))}
+      </div>
     </section>
   );
 }

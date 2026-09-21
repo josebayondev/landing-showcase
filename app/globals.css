@@ -367,6 +367,21 @@ html.js {
   }
 }
 
+/* components/project-card.tsx: el glifo rojo del panel de cada proyecto se
+   recorta desde abajo y se descubre según entra en pantalla, como si se
+   rellenara de tinta (mismo lenguaje que la barra de la cortina de carga,
+   pero con clip-path en vez de scaleX porque aquí no hay una barra que
+   escalar, sino un carácter que "llenar"). Sin @supports no hay clip-path
+   de partida, así que el glifo sale ya relleno del todo, nunca a medias. */
+@keyframes project-glyph-fill {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
 @supports (animation-timeline: view()) {
   /* scroll() en vez de view(): el hero arranca pegado al origen del documento,
      y medir sobre el scroll de la raíz da un recorrido predecible —la primera
@@ -411,6 +426,15 @@ html.js {
     animation-timeline: view();
     animation-range: cover 0% cover 55%;
   }
+
+  /* cover 10%/70%: empieza a rellenarse un poco antes de que el panel
+     termine de entrar y acaba mientras todavía se está leyendo la tarjeta,
+     no de golpe nada más asomar. */
+  html.js .project-glyph-fill {
+    animation: project-glyph-fill linear both;
+    animation-timeline: view();
+    animation-range: cover 10% cover 70%;
+  }
 }
 
 /* Quien pide menos movimiento en el sistema ve la página entera, quieta: sin
@@ -436,11 +460,13 @@ html.js {
   html.js [data-scroll-text] > span,
   html.js .hero-line-scroll-1,
   html.js .hero-line-scroll-2,
-  html.js .title-scroll {
+  html.js .title-scroll,
+  html.js .project-glyph-fill {
     animation: none;
     transition: none;
     opacity: 1;
     transform: none;
+    clip-path: none;
   }
 
   .animate-marquee {
