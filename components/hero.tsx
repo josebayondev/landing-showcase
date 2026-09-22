@@ -8,84 +8,89 @@ const BADGES = [
 // Server component: la entrada es CSS (clases .enter de globals.css), no hay
 // estado ni animación en JavaScript, así que no necesita "use client".
 //
-// `hero-scroll` va en la propia sección, no en un wrapper interno: las clases
-// .enter están en los descendientes, así que las dos animaciones no compiten
-// por el mismo elemento, y envolver los hijos rompería el flex (pasarían a ser
-// un solo item) y la posición absoluta de los badges.
+// `hero-scroll` va en la propia sección, no en el wrapper `.pin-wrapper`: las
+// clases .enter están en los descendientes, así que las dos animaciones no
+// compiten por el mismo elemento, y envolver los hijos rompería el flex
+// (pasarían a ser un solo item) y la posición absoluta de los badges.
 //
-// El nombre arranca primero (0.8s, una línea desde arriba y otra desde abajo) y
-// el resto entra cuando esa animación está terminando, escalonado cada ~100ms:
-// rol 0.5s, bio 0.62s y badges 0.72s / 0.8s, con lo que la secuencia cierra
-// sobre 1.3s. Antes el nombre tardaba 1.8s y los badges esperaban a 1.75s, y
-// la página no terminaba de "llegar" hasta los 2.3s.
+// El nombre arranca primero (1s, "Jose Ignacio" desde arriba) y el resto
+// entra cuando esa animación está terminando, escalonado cada ~100ms: rol
+// 0.5s, bio 0.62s y badges 0.72s / 0.8s. "Bayón" es la excepción: no entra al
+// cargar, se queda oculto y solo se revela al hacer scroll (ver más abajo).
 //
 // Los retardos van en `--enter-delay` y no en `animationDelay`: la regla
 // `.enter` los suma a `--enter-offset`, la espera común mientras la cortina de
 // carga está delante (globals.css). Con `animationDelay` inline no habría
 // forma de sumar las dos cosas.
 //
-// `hero-line-scroll-1/2` (globals.css) es aparte de todo lo anterior: el
-// nombre ya está visible al cargar, esto es solo lo que pasa después, al
-// hacer scroll. Cada línea tiene su propio rango sobre el scroll del
-// documento, desfasado a propósito, para que "Jose Ignacio" reaccione y se
-// vaya antes que "Bayón" en vez de moverse las dos línea a la vez.
+// `.pin-wrapper`/`.pin-sticky`/`.pin-reveal` (globals.css, dentro de
+// @supports animation-timeline; patrón reutilizable, también lo usan los
+// títulos de Proyectos y Sobre mí vía `SectionTitle`) anclan la sección en su
+// sitio durante un tramo de scroll extra, para que mientras se revela "Bayón"
+// no se mueva nada más. Solo esa línea reacciona al scroll durante ese tramo;
+// el resto (Jose Ignacio, rol, bio, badges) se queda fijo. Cuando termina, el
+// scroll se libera y toda la sección (incluida ya "Bayón", asentada) se
+// desvanece junta al alejarse (`hero-exit`, en globals.css). Fuera del
+// @supports (o sin JS, o con prefers-reduced-motion) no hay wrapper ni scroll
+// clavado: la página fluye normal y "Bayón" entra en la carga con `enter-up`,
+// nunca se queda invisible para siempre.
 export function Hero() {
   return (
-    <section
-      id="hero"
-      className="hero-scroll relative flex min-h-[calc(100dvh-6rem)] flex-col items-start justify-center gap-4 px-6 pt-32 text-left sm:px-12"
-    >
-      <p
-        className="enter enter-left font-display text-xs font-semibold tracking-[0.3em] text-zinc-500 uppercase dark:text-zinc-400"
-        style={{ "--enter-delay": "0.5s" } as CSSProperties}
+    <div className="pin-wrapper pin-wrapper--hero">
+      <section
+        id="hero"
+        className="hero-scroll pin-sticky relative flex min-h-[calc(100dvh-6rem)] flex-col items-start justify-center gap-4 px-6 pt-32 text-left sm:px-12"
       >
-        Software Developer
-      </p>
-
-      {/* Líneas fijas en vez de text-balance: alineado a la izquierda no
-          necesitamos que el navegador decida dónde cortar. */}
-      <h1 className="text-[clamp(2.75rem,9vw,8rem)] leading-none font-extrabold tracking-tight text-zinc-950 dark:text-white">
-        <span className="enter enter-down enter-name hero-line-scroll-1 block">
-          Jose Ignacio
-        </span>
-        <span
-          className="enter enter-up enter-name hero-line-scroll-2 block"
-          style={{ "--enter-delay": "0.08s" } as CSSProperties}
+        <p
+          className="enter enter-left font-display text-xs font-semibold tracking-[0.3em] text-zinc-500 uppercase dark:text-zinc-400"
+          style={{ "--enter-delay": "0.5s" } as CSSProperties}
         >
-          Bay<span className="text-red-500">ó</span>n
-        </span>
-      </h1>
+          Software Developer
+        </p>
 
-      <p
-        className="enter mt-8 max-w-md font-mono text-xs text-zinc-600 sm:max-w-lg sm:text-sm dark:text-zinc-400"
-        style={{ "--enter-delay": "0.62s" } as CSSProperties}
-      >
-        Entre Madrid y Murcia. Desarrollador centrado en el frontend y el
-        diseño UI/UX, con atención al detalle en cada interfaz que construyo,
-        también construyo backend y me aseguro que sea sólido, cargue rápido y
-        escale sin problemas.
-      </p>
-
-      <div className="absolute right-6 bottom-1 flex flex-col items-end gap-2">
-        {BADGES.map((badge) => (
+        {/* Líneas fijas en vez de text-balance: alineado a la izquierda no
+            necesitamos que el navegador decida dónde cortar. */}
+        <h1 className="text-[clamp(2.75rem,9vw,8rem)] leading-none font-extrabold tracking-tight text-zinc-950 dark:text-white">
+          <span className="enter enter-down enter-name block">Jose Ignacio</span>
           <span
-            key={badge.label}
-            style={{ "--enter-delay": badge.delay } as CSSProperties}
-            className={`enter enter-right flex items-center gap-1.5 rounded-full border border-black/10 px-3 py-1.5 text-[10px] font-medium tracking-wide uppercase dark:border-white/10 ${
-              badge.dot
-                ? // emerald-600 sobre blanco se queda en 3.77:1, por debajo de
-                  // AA para 11px; el 700 sube a 5.1:1 sin cambiar el tono.
-                  "text-emerald-700 dark:text-emerald-400"
-                : "text-zinc-600 dark:text-zinc-400"
-            }`}
+            className="enter enter-up enter-name pin-reveal block"
+            style={{ "--enter-delay": "0.08s" } as CSSProperties}
           >
-            {badge.dot && (
-              <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden />
-            )}
-            {badge.label}
+            Bay<span className="text-red-500">ó</span>n
           </span>
-        ))}
-      </div>
-    </section>
+        </h1>
+
+        <p
+          className="enter mt-8 max-w-md font-mono text-xs text-zinc-600 sm:max-w-lg sm:text-sm dark:text-zinc-400"
+          style={{ "--enter-delay": "0.62s" } as CSSProperties}
+        >
+          Entre Madrid y Murcia. Desarrollador centrado en el frontend y el
+          diseño UI/UX, con atención al detalle en cada interfaz que
+          construyo, también construyo backend y me aseguro que sea sólido,
+          cargue rápido y escale sin problemas.
+        </p>
+
+        <div className="absolute right-6 bottom-1 flex flex-col items-end gap-2">
+          {BADGES.map((badge) => (
+            <span
+              key={badge.label}
+              style={{ "--enter-delay": badge.delay } as CSSProperties}
+              className={`enter enter-right flex items-center gap-1.5 rounded-full border border-black/10 px-3 py-1.5 text-[10px] font-medium tracking-wide uppercase dark:border-white/10 ${
+                badge.dot
+                  ? // emerald-600 sobre blanco se queda en 3.77:1, por debajo
+                    // de AA para 11px; el 700 sube a 5.1:1 sin cambiar el tono.
+                    "text-emerald-700 dark:text-emerald-400"
+                  : "text-zinc-600 dark:text-zinc-400"
+              }`}
+            >
+              {badge.dot && (
+                <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden />
+              )}
+              {badge.label}
+            </span>
+          ))}
+        </div>
+      </section>
+    </div>
   );
 }

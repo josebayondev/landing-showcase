@@ -75,10 +75,12 @@ h6 {
    traía style="opacity:0" en cada bloque).
    ───────────────────────────────────────────────────────────────────────── */
 
+/* 140px y no 56px: solo las usa el nombre del hero (enter-name), donde el
+   recorrido grande es intencional para que la entrada se note con claridad. */
 @keyframes enter-up {
   from {
     opacity: 0;
-    transform: translateY(56px);
+    transform: translateY(140px);
   }
   to {
     opacity: 1;
@@ -89,7 +91,7 @@ h6 {
 @keyframes enter-down {
   from {
     opacity: 0;
-    transform: translateY(-56px);
+    transform: translateY(-140px);
   }
   to {
     opacity: 1;
@@ -160,9 +162,11 @@ html.js .enter-right {
 }
 
 /* El nombre del hero: entrada más larga y con una curva menos brusca que el
-   resto de la secuencia, porque es lo primero que se mira. */
+   resto de la secuencia, porque es lo primero que se mira. 1s y no 0.8s: con
+   el recorrido de 140px hace falta un pelín más de tiempo para que se lea
+   como un movimiento deliberado y no como un tirón. */
 html.js .enter-name {
-  animation-duration: 0.8s;
+  animation-duration: 1s;
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -319,9 +323,12 @@ html.js {
    no necesiten JavaScript para funcionar: el navegador las mueve solo.
    ───────────────────────────────────────────────────────────────────────── */
 
-/* El hero se aparta un poco más rápido que el scroll y se apaga al salir. La
-   opacidad aguanta hasta el 45% del recorrido para que el nombre no se vea
-   lavado mientras todavía es lo principal en pantalla. */
+/* El hero se desvanece y se aparta al alejarse, ya con el scroll clavado
+   liberado (`.pin-wrapper`/`exit`, más abajo): el rango usa la fase "exit" del
+   timeline con nombre, que solo arranca cuando el wrapper empieza a irse de
+   verdad, para que nada de esto se mezcle con la revelación de "Bayón". La
+   opacidad aguanta hasta el 45% del recorrido para que no se vea lavado nada
+   más soltarse. */
 @keyframes hero-exit {
   0% {
     opacity: 1;
@@ -344,13 +351,39 @@ html.js {
   }
 }
 
-/* components/hero.tsx: cada línea del nombre escala y sube por su cuenta,
-   por encima del hero-exit del <section>. transform-origin a la izquierda
-   porque el texto está alineado a la izquierda: si escalase desde el centro
-   se saldría también por la izquierda, contra el padding. */
-@keyframes hero-line-scroll {
+/* "Bayón" en el hero: sube desde abajo mientras aparece (0-60%) y termina con
+   un pequeño asentado de escala (60-100%), para que no se quede estático nada
+   más completarse. Solo lo usa el hero (ver `.hero-scroll .pin-reveal` más
+   abajo) — en los títulos de sección ese asentado desplazaba el título hacia
+   arriba justo después de anclarlo abajo, reabriendo el hueco con el
+   contenido que ese anclaje quería evitar. */
+@keyframes pin-reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(140px);
+  }
+  60% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    transform: scale(1.15) translateY(-14%);
+  }
+}
+
+/* Reveal de los títulos de sección (.pin-reveal genérico, más abajo): mismo
+   lenguaje de subida desde abajo, pero sin el asentado de escala — aquí el
+   título ya queda anclado al fondo del bloque (items-end en
+   components/work.tsx y about.tsx) para que el contenido de debajo llegue
+   pegado, y ese desplazamiento final lo alejaría otra vez. */
+@keyframes pin-reveal-settle {
+  from {
+    opacity: 0;
+    transform: translateY(140px);
+  }
   to {
-    transform: scale(1.08) translateY(-10%);
+    opacity: 1;
+    transform: none;
   }
 }
 
@@ -383,13 +416,92 @@ html.js {
 }
 
 @supports (animation-timeline: view()) {
-  /* scroll() en vez de view(): el hero arranca pegado al origen del documento,
-     y medir sobre el scroll de la raíz da un recorrido predecible —la primera
-     pantalla— en lugar de depender de cuánto asoma el propio bloque. */
+  /* ───────────────────────────────────────────────────────────────────────
+     Scroll clavado (patrón reutilizable): un `.pin-wrapper` más alto que su
+     contenido, con un `.pin-sticky` dentro (`position: sticky; top: 0`), se
+     queda pegado al viewport mientras se recorre esa altura extra — la
+     técnica estándar para "anclar" un bloque durante un tramo, sin
+     JavaScript. Lo usan el hero (components/hero.tsx) y los títulos de
+     Proyectos/Sobre mí (section-title.tsx vía la prop `pinReveal`).
+
+     `view-timeline-name` en el wrapper (no `scroll(root block)`) es lo que
+     lo hace reutilizable en cualquier punto de la página: con un timeline con
+     nombre, cualquier descendiente puede referenciarlo (`animation-timeline:
+     --pin-progress`) sin importar dónde esté el wrapper en el documento.
+
+     `contain 0%`/`contain 100%` es justo el tramo en el que el wrapper cubre
+     el viewport por completo — es decir, exactamente mientras el hijo está
+     clavado — así que `.pin-reveal` (más abajo) usa ese rango para revelarse
+     mientras dura el anclaje. `exit 0%`/`exit 100%` es el tramo siguiente,
+     cuando el wrapper empieza a irse de verdad: lo usa hero-exit para
+     desvanecer el hero una vez se suelta el scroll clavado.
+
+     EXCEPCIÓN: el hero no usa el timeline con nombre para su propio
+     `hero-exit`/`.pin-reveal` (ver las reglas de `.hero-scroll` más abajo,
+     que los pisan) — arranca pegado al origen del documento (scrollY: 0), y
+     ahí un timeline con nombre nace ya parcialmente dentro de su fase
+     "contain" desde el primer fotograma (no hay recorrido de página por
+     encima para la fase de entrada), así que "Bayón" se revelaría un poco
+     sin haber hecho scroll. Con `scroll(root block)` y vh absolutos no pasa,
+     porque mide scroll absoluto y no la posición del propio bloque. Los
+     títulos de sección sí están más abajo en la página, con recorrido de
+     sobra antes, así que a ellos no les afecta. */
+  html.js .pin-wrapper {
+    view-timeline-name: --pin-progress;
+    view-timeline-axis: block;
+  }
+
+  /* 35dvh de scroll clavado extra: la ventana de revelado de "Bayón" (0-30vh,
+     ver `.hero-scroll .pin-reveal` más abajo) se mantiene — se pidió
+     expresamente que fuera despacio — pero el margen de después de revelarse
+     y antes de soltar el anclaje se recorta al mínimo (5vh) para que la
+     transición hero → Marquee no se sienta separada. */
+  html.js .pin-wrapper--hero {
+    height: calc(135dvh - 6rem);
+  }
+
+  /* 38dvh: sticky de 28dvh (ver components/work.tsx y about.tsx) + 10dvh de
+     scroll clavado extra — bastante más corto que el hero porque aquí solo se
+     revela una línea de título, no dos, y para que el contenido de debajo
+     (tarjetas, bio) llegue enseguida en vez de sentirse lejos. */
+  html.js .pin-wrapper--section {
+    height: 38dvh;
+  }
+
+  html.js .pin-sticky {
+    position: sticky;
+    top: 0;
+  }
+
+  /* El hero es la excepción dentro de este patrón: sigue con `scroll(root
+     block)` y vh absolutos en vez del timeline con nombre, porque arranca
+     pegado al origen del documento (scrollY: 0). Ahí el timeline con nombre
+     no sirve — al no haber recorrido de página por encima, el propio wrapper
+     ya nace parcialmente dentro de su fase "contain" en scrollY: 0, así que
+     "Bayón" empezaría a revelarse sin haber hecho scroll. Con `scroll(root
+     block)` no pasa, porque mide scroll absoluto y no la posición del propio
+     bloque. Arranca en 35vh, justo donde termina el tramo clavado (35dvh de
+     `.pin-wrapper--hero`), y no en 0: mientras la sección está anclada
+     revelando a "Bayón" no debe pasar nada más. Solo 15vh de recorrido (antes
+     25vh): con el resto del sitio tan ajustado, un fundido más largo volvía a
+     notarse como un hueco. */
   html.js .hero-scroll {
     animation: hero-exit linear both;
     animation-timeline: scroll(root block);
-    animation-range: 0 100vh;
+    animation-range: 35vh 50vh;
+  }
+
+  /* Mismo motivo que arriba: "Bayón" usa scroll absoluto, no el timeline con
+     nombre que sí vale para los títulos de sección (más abajo). Se agota a
+     30vh (se pidió que la revelación en sí fuese despacio), dejando solo 5vh
+     de margen asentado antes de que se suelte a los 35vh — lo justo para que
+     no se libere en el mismo instante en que termina. animation-name también
+     se pisa aquí: "Bayón" sí quiere el asentado de escala (pin-reveal-up),
+     a diferencia del genérico .pin-reveal de los títulos de sección. */
+  html.js .hero-scroll .pin-reveal {
+    animation-name: pin-reveal-up;
+    animation-timeline: scroll(root block);
+    animation-range: 0 30vh;
   }
 
   /* components/scroll-text.tsx. 0.2 y no 0: la palabra que todavía no ha
@@ -401,22 +513,20 @@ html.js {
     animation-range: cover 20% cover 45%;
   }
 
-  /* Rangos distintos por línea para que el scroll las separe en dos tiempos:
-     "Jose Ignacio" termina su recorrido antes que "Bayón" empiece a moverse
-     de verdad, así se lee como un efecto en cadena y no las dos a la vez. */
-  html.js .hero-line-scroll-1,
-  html.js .hero-line-scroll-2 {
+  /* El título/línea que se revela durante el tramo clavado: se agota al 85%
+     de ese tramo (contain 0% a contain 85%, antes 60%: se pidió notar la
+     revelación un poco más despacio al hacer scroll), así que queda ya
+     asentado un momento antes de que el scroll se libere, en vez de terminar
+     justo cuando se suelta. Sin asentado de escala (pin-reveal-settle, no
+     pin-reveal-up): aquí el título ya está anclado al fondo del bloque, y ese
+     desplazamiento lo alejaría del contenido de debajo otra vez. La regla
+     `.hero-scroll .pin-reveal` de arriba, más específica, pisa esto para
+     "Bayón" en el hero (ver el porqué ahí). */
+  html.js .pin-reveal {
     transform-origin: left center;
-    animation: hero-line-scroll linear both;
-    animation-timeline: scroll(root block);
-  }
-
-  html.js .hero-line-scroll-1 {
-    animation-range: 0 60vh;
-  }
-
-  html.js .hero-line-scroll-2 {
-    animation-range: 15vh 90vh;
+    animation: pin-reveal-settle linear both;
+    animation-timeline: --pin-progress;
+    animation-range: contain 0% contain 85%;
   }
 
   /* cover 0%/55% y no 0%/100%: se asienta a mitad de recorrido, mientras
@@ -458,8 +568,7 @@ html.js {
   html.js [data-reveal],
   html.js .hero-scroll,
   html.js [data-scroll-text] > span,
-  html.js .hero-line-scroll-1,
-  html.js .hero-line-scroll-2,
+  html.js .pin-reveal,
   html.js .title-scroll,
   html.js .project-glyph-fill {
     animation: none;
@@ -467,6 +576,19 @@ html.js {
     opacity: 1;
     transform: none;
     clip-path: none;
+  }
+
+  /* Sin scroll clavado tampoco (hero y títulos de sección): con menos
+     movimiento, ese tramo de scroll extra sin nada animándose sería un hueco
+     muerto, no solo "quieto". Los selectores base (sin --hero/--section)
+     bastan: misma especificidad que los modificadores y van después en el
+     fichero, así que ganan igual. */
+  html.js .pin-wrapper {
+    height: auto;
+  }
+
+  html.js .pin-sticky {
+    position: relative;
   }
 
   .animate-marquee {

@@ -16,10 +16,20 @@ const PROJECTS = [
 
 export function Work() {
   return (
-    <section id="work" className="px-6 py-24 sm:px-12">
-      <Reveal>
-        <SectionTitle>Proyectos</SectionTitle>
-      </Reveal>
+    <section id="work" className="px-6 py-8 sm:px-12">
+      {/* Scroll clavado (ver components/hero.tsx y globals.css): la sección
+          se ancla brevemente mientras "Proyectos" sube y se asienta, antes de
+          soltar el scroll para las tarjetas de abajo. items-end y no
+          items-center: con el título centrado quedaba medio scroll vacío por
+          debajo antes de llegar a las tarjetas; pegado abajo, en cuanto se
+          suelta el anclaje viene enseguida el contenido. */}
+      <div className="pin-wrapper pin-wrapper--section">
+        <div className="pin-sticky flex min-h-[28dvh] items-end pb-8">
+          <Reveal>
+            <SectionTitle pinReveal>Proyectos</SectionTitle>
+          </Reveal>
+        </div>
+      </div>
 
       <Reveal delay={0.1}>
         <div className="mt-8 border-t border-black/10 dark:border-white/10" />

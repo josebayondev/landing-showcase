@@ -10,7 +10,7 @@ const LINKS = [
 
 export function Contact() {
   return (
-    <section id="contact" className="px-6 py-24 sm:px-12">
+    <section id="contact" className="px-6 py-8 sm:px-12">
       <Reveal delay={0.1}>
         <SectionTitle className="mt-4">
           <a
