@@ -7,7 +7,7 @@ export function Marquee() {
   return (
     <div
       aria-hidden
-      className="mt-32 overflow-hidden border-y border-black/10 dark:border-white/10"
+      className="mt-12 overflow-hidden border-y border-black/10 dark:border-white/10"
     >
       <div className="flex w-max animate-marquee py-3.5">
         {[...SKILLS, ...SKILLS].map((item, index) => (
