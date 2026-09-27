@@ -1,7 +1,30 @@
 @import "tailwindcss";
 
+/* El resto del CSS vive en styles/, partido por dominio. El orden importa: el
+   bloque de reduced motion va el último para ganar a las animaciones. */
+@import "../styles/base.css";
+@import "../styles/animations/enter.css";
+@import "../styles/animations/preloader.css";
+@import "../styles/animations/scroll.css";
+@import "../styles/animations/reduced-motion.css";
+
 /* Modo oscuro controlado por clase (.dark en <html>), no por prefers-color-scheme */
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Animaciones ligadas al scroll como variante: `scroll-driven:` solo aplica si
+   el navegador soporta `animation-timeline`, si hay JavaScript (html.js, como
+   el resto de animaciones) y si no se ha pedido menos movimiento. Así lo que
+   arranca atenuado o recortado nunca se queda así esperando algo que no va a
+   llegar, y reduced motion no necesita reglas aparte para estas utilidades. */
+@custom-variant scroll-driven {
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      &:where(html.js *) {
+        @slot;
+      }
+    }
+  }
+}
 
 :root {
   --background: #ffffff;
@@ -19,588 +42,62 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-syne);
+}
+
+/* Animaciones como utilidades `animate-*`. Tailwind solo emite cada
+   @keyframes si su utilidad se usa en algún componente. Las de scroll van con
+   `linear both`: la duración la marca el recorrido del scroll, no el reloj. */
+@theme {
   --animate-marquee: marquee 32s linear infinite;
-}
+  --animate-word-in: word-in linear both;
+  --animate-title-settle: title-settle linear both;
+  --animate-glyph-fill: glyph-fill linear both;
 
-/* El navbar es fijo: sin scroll-padding, al saltar a #work o #about el título
-   de la sección queda escondido debajo de la barra. */
-html {
-  scroll-behavior: smooth;
-  scroll-padding-top: 7rem;
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
-}
-
-/* Fuente de titulares en todo el sitio (variable font Syne, estilo geométrico) */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-display);
-}
-
-/* El outline por defecto casi no se distingue sobre el fondo oscuro. Solo
-   :focus-visible, para no marcar el foco al hacer clic con el ratón. */
-:focus-visible {
-  outline: 2px solid var(--color-red-500);
-  outline-offset: 3px;
-  border-radius: 2px;
-}
-
-/* El track del marquee (components/marquee.tsx) duplica su contenido una vez
-   y se desplaza exactamente la mitad de su ancho: como las dos mitades son
-   idénticas, el bucle es perfecto y no se nota el corte. */
-@keyframes marquee {
-  from {
-    transform: translateX(0);
+  /* El track del marquee (components/marquee.tsx) duplica su contenido una
+     vez y se desplaza exactamente la mitad de su ancho: como las dos mitades
+     son idénticas, el bucle es perfecto y no se nota el corte. */
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
   }
-  to {
-    transform: translateX(-50%);
+
+  @keyframes word-in {
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes title-settle {
+    from {
+      transform: scale(1.05);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes glyph-fill {
+    from {
+      clip-path: inset(100% 0 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────────
-   Animaciones de entrada
-
-   Todas cuelgan de `html.js`, la clase que pone components/theme-script.tsx
-   antes del primer pintado. Sin JavaScript no se aplica ninguna y el
-   contenido se ve tal cual, en vez de quedarse en opacity 0 esperando a un
-   script que no va a llegar (era el caso con framer-motion: el HTML servido
-   traía style="opacity:0" en cada bloque).
-   ───────────────────────────────────────────────────────────────────────── */
-
-/* 140px y no 56px: solo las usa el nombre del hero (enter-name), donde el
-   recorrido grande es intencional para que la entrada se note con claridad. */
-@keyframes enter-up {
-  from {
-    opacity: 0;
-    transform: translateY(140px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+/* Tailwind no trae utilidades para scroll-driven animations. `range-*` acepta
+   valores arbitrarios con `_` en vez de espacios: `range-[cover_0%_cover_55%]`.
+   Van después de `animate-*` en el CSS generado (comprobado en el build): el
+   atajo `animation` resetea `animation-timeline`, así que el orden importa. */
+@utility timeline-view {
+  animation-timeline: view();
 }
 
-@keyframes enter-down {
-  from {
-    opacity: 0;
-    transform: translateY(-140px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes enter-left {
-  from {
-    opacity: 0;
-    transform: translateX(-32px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes enter-right {
-  from {
-    opacity: 0;
-    transform: translateX(32px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes enter-fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-/* `both` deja aplicado el fotograma inicial durante el animation-delay: sin
-   él, los elementos con retardo parpadean visibles antes de empezar.
-
-   El retardo se parte en dos: `--enter-delay` es el escalonado propio de cada
-   elemento (lo pone el componente) y `--enter-offset` es la espera común a
-   toda la secuencia, que existe para que la entrada no ocurra detrás de la
-   cortina de carga. La declaración va DESPUÉS del atajo `animation`, que si no
-   resetearía animation-delay a 0. */
-html.js .enter {
-  animation: enter-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: calc(var(--enter-offset, 0s) + var(--enter-delay, 0s));
-}
-
-html.js .enter-up {
-  animation-name: enter-up;
-}
-
-html.js .enter-down {
-  animation-name: enter-down;
-}
-
-html.js .enter-left {
-  animation-name: enter-left;
-}
-
-html.js .enter-right {
-  animation-name: enter-right;
-}
-
-/* El nombre del hero: entrada más larga y con una curva menos brusca que el
-   resto de la secuencia, porque es lo primero que se mira. 1s y no 0.8s: con
-   el recorrido de 140px hace falta un pelín más de tiempo para que se lea
-   como un movimiento deliberado y no como un tirón. */
-html.js .enter-name {
-  animation-duration: 1s;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* Scroll reveal de las secciones (components/reveal.tsx): el observer marca
-   data-revealed la primera vez que el bloque entra en el viewport. */
-html.js [data-reveal] {
-  opacity: 0;
-  transform: translateY(24px);
-  transition:
-    opacity 0.6s ease-out,
-    transform 0.6s ease-out;
-}
-
-html.js [data-reveal][data-revealed] {
-  opacity: 1;
-  transform: none;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Cortina de carga (components/preloader.tsx)
-
-   Secuencia completa de 2.05s, toda en CSS: el nombre entra recortado por una
-   máscara (0 → 0.2s), la barra roja se llena (0.2 → 1.5s), el nombre sale por
-   arriba (1.5 → 1.72s) y la cortina se retira hacia arriba con un clip-path
-   (1.72 → 2.05s). Los porcentajes de cada keyframe están calculados sobre esos
-   2.05s para que las tres animaciones encajen sin depender unas de otras.
-
-   `display: none` por defecto y visible solo bajo `html.js`: sin JavaScript no
-   aparece la cortina y la web se ve directamente, nunca una pantalla opaca
-   esperando a un script que no va a llegar.
-
-   Contrapartida conocida: dos segundos de cortina opaca retrasan el LCP.
-   ───────────────────────────────────────────────────────────────────────── */
-
-.preloader {
-  display: none;
-}
-
-html.js .preloader {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.25rem;
-  background: var(--background);
-  /* Nunca captura clics, ni siquiera mientras cubre la página: así no deja
-     nada atrapado detrás ni intercepta nada una vez se ha retirado. */
-  pointer-events: none;
-  animation: preloader-lift 2.05s cubic-bezier(0.76, 0, 0.24, 1) both;
-}
-
-html.js .preloader-name {
-  display: block;
-  overflow: hidden;
-}
-
-html.js .preloader-name-inner {
-  display: block;
-  animation: preloader-name 2.05s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-html.js .preloader-bar {
-  width: min(180px, 42vw);
-  height: 2px;
-  overflow: hidden;
-  background: color-mix(in oklab, var(--foreground) 14%, transparent);
-}
-
-html.js .preloader-bar-fill {
-  display: block;
-  height: 100%;
-  width: 100%;
-  transform-origin: left;
-  background: var(--color-red-500);
-  animation: preloader-bar 2.05s linear both;
-}
-
-/* 110% y no 100%: deja margen para tildes y descendentes, que con 100% asoman
-   por el borde de la máscara. */
-@keyframes preloader-name {
-  0% {
-    transform: translateY(110%);
-  }
-
-  10% {
-    transform: translateY(0);
-  }
-
-  73% {
-    transform: translateY(0);
-  }
-
-  84% {
-    transform: translateY(-110%);
-  }
-
-  100% {
-    transform: translateY(-110%);
-  }
-}
-
-@keyframes preloader-bar {
-  0%,
-  10% {
-    transform: scaleX(0);
-    opacity: 1;
-  }
-
-  73% {
-    transform: scaleX(1);
-    opacity: 1;
-  }
-
-  82%,
-  100% {
-    transform: scaleX(1);
-    opacity: 0;
-  }
-}
-
-/* inset(0 0 100% 0): el recorte se cierra contra el borde superior, así que la
-   página se descubre de abajo arriba, como una persiana que sube. */
-@keyframes preloader-lift {
-  0%,
-  84% {
-    clip-path: inset(0 0 0 0);
-    visibility: visible;
-  }
-
-  100% {
-    clip-path: inset(0 0 100% 0);
-    visibility: hidden;
-  }
-}
-
-/* La entrada del hero espera a que la cortina levante; si no, ocurriría entera
-   por detrás y no se vería. */
-html.js {
-  --enter-offset: 1.78s;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Animaciones ligadas al scroll (CSS scroll-driven)
-
-   Van con `animation-timeline`, que hoy cubre ~87% de los navegadores
-   (Chrome/Edge 115+, Opera 101+, Safari 26+, Firefox 156+). Por eso todo lo
-   que arranca atenuado vive dentro de `@supports`: quien no lo soporte ve el
-   contenido a opacidad normal y quieto, nunca un hueco en blanco.
-
-   Cuelgan de `html.js` por coherencia con el resto del fichero, aunque estas
-   no necesiten JavaScript para funcionar: el navegador las mueve solo.
-   ───────────────────────────────────────────────────────────────────────── */
-
-/* El hero se desvanece y se aparta al alejarse, ya con el scroll clavado
-   liberado (`.pin-wrapper`/`exit`, más abajo): el rango usa la fase "exit" del
-   timeline con nombre, que solo arranca cuando el wrapper empieza a irse de
-   verdad, para que nada de esto se mezcle con la revelación de "Bayón". La
-   opacidad aguanta hasta el 45% del recorrido para que no se vea lavado nada
-   más soltarse. */
-@keyframes hero-exit {
-  0% {
-    opacity: 1;
-    transform: none;
-  }
-
-  45% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateY(-18%);
-  }
-}
-
-@keyframes word-in {
-  to {
-    opacity: 1;
-  }
-}
-
-/* "Bayón" en el hero: sube desde abajo mientras aparece (0-60%) y termina con
-   un pequeño asentado de escala (60-100%), para que no se quede estático nada
-   más completarse. Solo lo usa el hero (ver `.hero-scroll .pin-reveal` más
-   abajo) — en los títulos de sección ese asentado desplazaba el título hacia
-   arriba justo después de anclarlo abajo, reabriendo el hueco con el
-   contenido que ese anclaje quería evitar. */
-@keyframes pin-reveal-up {
-  from {
-    opacity: 0;
-    transform: translateY(140px);
-  }
-  60% {
-    opacity: 1;
-    transform: none;
-  }
-  100% {
-    transform: scale(1.15) translateY(-14%);
-  }
-}
-
-/* Reveal de los títulos de sección (.pin-reveal genérico, más abajo): mismo
-   lenguaje de subida desde abajo, pero sin el asentado de escala — aquí el
-   título ya queda anclado al fondo del bloque (items-end en
-   components/work.tsx y about.tsx) para que el contenido de debajo llegue
-   pegado, y ese desplazamiento final lo alejaría otra vez. */
-@keyframes pin-reveal-settle {
-  from {
-    opacity: 0;
-    transform: translateY(140px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-/* components/section-title.tsx: mismo lenguaje que el nombre del hero (con
-   el que comparte tamaño y peso), pero al revés —entra grande y se asienta—
-   porque aquí no hay cortina que ya lo haya mostrado: el <Reveal> que envuelve
-   el título hace el fade, esto solo el asentado de escala. */
-@keyframes title-settle {
-  from {
-    transform: scale(1.05);
-  }
-  to {
-    transform: scale(1);
-  }
-}
-
-/* components/project-card.tsx: el glifo rojo del panel de cada proyecto se
-   recorta desde abajo y se descubre según entra en pantalla, como si se
-   rellenara de tinta (mismo lenguaje que la barra de la cortina de carga,
-   pero con clip-path en vez de scaleX porque aquí no hay una barra que
-   escalar, sino un carácter que "llenar"). Sin @supports no hay clip-path
-   de partida, así que el glifo sale ya relleno del todo, nunca a medias. */
-@keyframes project-glyph-fill {
-  from {
-    clip-path: inset(100% 0 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-@supports (animation-timeline: view()) {
-  /* ───────────────────────────────────────────────────────────────────────
-     Scroll clavado (patrón reutilizable): un `.pin-wrapper` más alto que su
-     contenido, con un `.pin-sticky` dentro (`position: sticky; top: 0`), se
-     queda pegado al viewport mientras se recorre esa altura extra — la
-     técnica estándar para "anclar" un bloque durante un tramo, sin
-     JavaScript. Lo usan el hero (components/hero.tsx) y los títulos de
-     Proyectos/Sobre mí (section-title.tsx vía la prop `pinReveal`).
-
-     `view-timeline-name` en el wrapper (no `scroll(root block)`) es lo que
-     lo hace reutilizable en cualquier punto de la página: con un timeline con
-     nombre, cualquier descendiente puede referenciarlo (`animation-timeline:
-     --pin-progress`) sin importar dónde esté el wrapper en el documento.
-
-     `contain 0%`/`contain 100%` es justo el tramo en el que el wrapper cubre
-     el viewport por completo — es decir, exactamente mientras el hijo está
-     clavado — así que `.pin-reveal` (más abajo) usa ese rango para revelarse
-     mientras dura el anclaje. `exit 0%`/`exit 100%` es el tramo siguiente,
-     cuando el wrapper empieza a irse de verdad: lo usa hero-exit para
-     desvanecer el hero una vez se suelta el scroll clavado.
-
-     EXCEPCIÓN: el hero no usa el timeline con nombre para su propio
-     `hero-exit`/`.pin-reveal` (ver las reglas de `.hero-scroll` más abajo,
-     que los pisan) — arranca pegado al origen del documento (scrollY: 0), y
-     ahí un timeline con nombre nace ya parcialmente dentro de su fase
-     "contain" desde el primer fotograma (no hay recorrido de página por
-     encima para la fase de entrada), así que "Bayón" se revelaría un poco
-     sin haber hecho scroll. Con `scroll(root block)` y vh absolutos no pasa,
-     porque mide scroll absoluto y no la posición del propio bloque. Los
-     títulos de sección sí están más abajo en la página, con recorrido de
-     sobra antes, así que a ellos no les afecta. */
-  html.js .pin-wrapper {
-    view-timeline-name: --pin-progress;
-    view-timeline-axis: block;
-  }
-
-  /* 90dvh de scroll clavado extra (antes 70dvh, antes 35dvh): "Bayón" se
-     revela en 0-45vh y luego se queda clavado, sin animar nada, hasta 90vh —
-     un tramo de scroll muerto a propósito, para que se note que la sección
-     aguanta fija antes de soltarse. hero-exit arranca justo en ese 90vh (ver
-     más abajo). */
-  html.js .pin-wrapper--hero {
-    height: calc(190dvh - 6rem);
-  }
-
-  /* 46dvh (antes 38dvh): sticky de 28dvh (ver components/work.tsx y
-     about.tsx) + 18dvh de scroll clavado extra — más corto que el hero porque
-     aquí solo se revela una línea de título, no dos, pero con dwell de sobra
-     para que el título se note quieto antes de soltar. */
-  html.js .pin-wrapper--section {
-    height: 46dvh;
-  }
-
-  html.js .pin-sticky {
-    position: sticky;
-    top: 0;
-  }
-
-  /* El hero es la excepción dentro de este patrón: sigue con `scroll(root
-     block)` y vh absolutos en vez del timeline con nombre, porque arranca
-     pegado al origen del documento (scrollY: 0). Ahí el timeline con nombre
-     no sirve — al no haber recorrido de página por encima, el propio wrapper
-     ya nace parcialmente dentro de su fase "contain" en scrollY: 0, así que
-     "Bayón" empezaría a revelarse sin haber hecho scroll. Con `scroll(root
-     block)` no pasa, porque mide scroll absoluto y no la posición del propio
-     bloque. Arranca en 90vh (antes 70vh, antes 35vh), justo donde termina el
-     tramo clavado (90dvh de `.pin-wrapper--hero`) tras el reveal de "Bayón" y
-     su pausa quieta, y no antes: mientras la sección está anclada no debe
-     pasar nada más. */
-  html.js .hero-scroll {
-    animation: hero-exit linear both;
-    animation-timeline: scroll(root block);
-    animation-range: 90vh 110vh;
-  }
-
-  /* Mismo motivo que arriba: "Bayón" usa scroll absoluto, no el timeline con
-     nombre que sí vale para los títulos de sección (más abajo). Se agota a
-     45vh (antes 35vh, antes 30vh: se pidió más de una vez que fuera más
-     despacio) y a partir de ahí no hay más animación hasta que hero-exit
-     arranca a los 90vh: esos 45vh de por medio son el tramo clavado y quieto
-     que se pidió ("un par de scrolles parado"), antes de soltar el anclaje.
-     animation-name también se pisa aquí: "Bayón" sí quiere el asentado de
-     escala (pin-reveal-up), a diferencia del genérico .pin-reveal de los
-     títulos de sección. */
-  html.js .hero-scroll .pin-reveal {
-    animation-name: pin-reveal-up;
-    animation-timeline: scroll(root block);
-    animation-range: 0 45vh;
-  }
-
-  /* components/scroll-text.tsx. 0.2 y no 0: la palabra que todavía no ha
-     entrado se intuye, así el párrafo no parece cortado a media frase. */
-  html.js [data-scroll-text] > span {
-    opacity: 0.2;
-    animation: word-in linear both;
-    animation-timeline: view();
-    animation-range: cover 20% cover 45%;
-  }
-
-  /* El título/línea que se revela durante el tramo clavado: se agota al 92%
-     de ese tramo (contain 0% a contain 92%, antes 85%, antes 60%: se pidió
-     más de una vez notar la revelación más despacio al hacer scroll), así
-     que queda ya asentado un momento antes de que el scroll se libere, en vez
-     de terminar justo cuando se suelta. Sin asentado de escala
-     (pin-reveal-settle, no pin-reveal-up): aquí el título ya está anclado al
-     fondo del bloque, y ese desplazamiento lo alejaría del contenido de
-     debajo otra vez. La regla `.hero-scroll .pin-reveal` de arriba, más
-     específica, pisa esto para "Bayón" en el hero (ver el porqué ahí). */
-  html.js .pin-reveal {
-    transform-origin: left center;
-    animation: pin-reveal-settle linear both;
-    animation-timeline: --pin-progress;
-    animation-range: contain 0% contain 92%;
-  }
-
-  /* cover 0%/55% y no 0%/100%: se asienta a mitad de recorrido, mientras
-     todavía está entrando en pantalla, no cuando ya lleva rato visible. */
-  html.js .title-scroll {
-    animation: title-settle linear both;
-    animation-timeline: view();
-    animation-range: cover 0% cover 55%;
-  }
-
-  /* cover 10%/70%: empieza a rellenarse un poco antes de que el panel
-     termine de entrar y acaba mientras todavía se está leyendo la tarjeta,
-     no de golpe nada más asomar. */
-  html.js .project-glyph-fill {
-    animation: project-glyph-fill linear both;
-    animation-timeline: view();
-    animation-range: cover 10% cover 70%;
-  }
-}
-
-/* Quien pide menos movimiento en el sistema ve la página entera, quieta: sin
-   marquee, sin entradas y sin scroll suave. */
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  /* Sin cortina, y el hero recupera su entrada sin la espera que la cortina
-     justificaba. */
-  html.js .preloader {
-    display: none;
-  }
-
-  html.js {
-    --enter-offset: 0s;
-  }
-
-  html.js .enter,
-  html.js [data-reveal],
-  html.js .hero-scroll,
-  html.js [data-scroll-text] > span,
-  html.js .pin-reveal,
-  html.js .title-scroll,
-  html.js .project-glyph-fill {
-    animation: none;
-    transition: none;
-    opacity: 1;
-    transform: none;
-    clip-path: none;
-  }
-
-  /* Sin scroll clavado tampoco (hero y títulos de sección): con menos
-     movimiento, ese tramo de scroll extra sin nada animándose sería un hueco
-     muerto, no solo "quieto". Los selectores base (sin --hero/--section)
-     bastan: misma especificidad que los modificadores y van después en el
-     fichero, así que ganan igual. */
-  html.js .pin-wrapper {
-    height: auto;
-  }
-
-  html.js .pin-sticky {
-    position: relative;
-  }
-
-  .animate-marquee {
-    animation: none;
-  }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+@utility range-* {
+  animation-range: --value([*]);
 }

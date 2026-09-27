@@ -15,9 +15,15 @@ type ProjectCardProps = {
 // En vez de una captura del sitio (quedaba pobre a este tamaño), el panel
 // derecho es un glifo grande en dos capas superpuestas: una tenue de fondo y
 // otra en rojo que se "rellena" con `clip-path` según el bloque entra en el
-// viewport (`.project-glyph-fill`, definido en globals.css junto al resto de
-// animaciones ligadas al scroll, mismo mecanismo que la barra de la cortina
-// de carga pero con clip-path en vez de scaleX).
+// viewport, como si se rellenara de tinta (mismo lenguaje que la barra de la
+// cortina de carga, pero con clip-path en vez de scaleX porque aquí no hay
+// una barra que escalar, sino un carácter que "llenar"). Sin soporte de
+// animation-timeline no hay clip-path de partida, así que el glifo sale ya
+// relleno del todo, nunca a medias.
+//
+// cover 10%/70%: empieza a rellenarse un poco antes de que el panel termine de
+// entrar y acaba mientras todavía se está leyendo la tarjeta, no de golpe nada
+// más asomar.
 export function ProjectCard({ index, meta, title, tags, description, href, glyph }: ProjectCardProps) {
   return (
     <a
@@ -62,7 +68,7 @@ export function ProjectCard({ index, meta, title, tags, description, href, glyph
           <span className="block font-display text-[6rem] leading-none font-extrabold text-zinc-950/10 select-none sm:text-[8rem] dark:text-white/10">
             {glyph}
           </span>
-          <span className="project-glyph-fill absolute inset-0 block font-display text-[6rem] leading-none font-extrabold text-red-500 select-none sm:text-[8rem]">
+          <span className="scroll-driven:animate-glyph-fill scroll-driven:timeline-view scroll-driven:range-[cover_10%_cover_70%] absolute inset-0 block font-display text-[6rem] leading-none font-extrabold text-red-500 select-none sm:text-[8rem]">
             {glyph}
           </span>
         </div>

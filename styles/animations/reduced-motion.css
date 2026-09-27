@@ -1,0 +1,55 @@
+/* Quien pide menos movimiento en el sistema ve la página entera, quieta: sin
+   marquee, sin entradas y sin scroll suave. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  /* Sin cortina, y el hero recupera su entrada sin la espera que la cortina
+     justificaba. */
+  html.js .preloader {
+    display: none;
+  }
+
+  html.js {
+    --enter-offset: 0s;
+  }
+
+  /* Las utilidades con `scroll-driven:` (texto palabra a palabra, títulos,
+     glifo) no aparecen aquí: la propia variante ya excluye reduced motion. */
+  html.js .enter,
+  html.js [data-reveal],
+  html.js .hero-scroll,
+  html.js .pin-reveal {
+    animation: none;
+    transition: none;
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+
+  /* Sin scroll clavado tampoco (hero y títulos de sección): con menos
+     movimiento, ese tramo de scroll extra sin nada animándose sería un hueco
+     muerto, no solo "quieto". Los selectores base (sin --hero/--section)
+     bastan: misma especificidad que los modificadores y van después (este fichero
+     se importa el último en app/globals.css), así que ganan igual. */
+  html.js .pin-wrapper {
+    height: auto;
+  }
+
+  html.js .pin-sticky {
+    position: relative;
+  }
+
+  .animate-marquee {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

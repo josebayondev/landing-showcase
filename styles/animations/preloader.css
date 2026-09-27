@@ -1,0 +1,125 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Cortina de carga (components/preloader.tsx)
+
+   Secuencia completa de 2.05s, toda en CSS: el nombre entra recortado por una
+   máscara (0 → 0.2s), la barra roja se llena (0.2 → 1.5s), el nombre sale por
+   arriba (1.5 → 1.72s) y la cortina se retira hacia arriba con un clip-path
+   (1.72 → 2.05s). Los porcentajes de cada keyframe están calculados sobre esos
+   2.05s para que las tres animaciones encajen sin depender unas de otras.
+
+   `display: none` por defecto y visible solo bajo `html.js`: sin JavaScript no
+   aparece la cortina y la web se ve directamente, nunca una pantalla opaca
+   esperando a un script que no va a llegar.
+
+   Contrapartida conocida: dos segundos de cortina opaca retrasan el LCP.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.preloader {
+  display: none;
+}
+
+html.js .preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  background: var(--background);
+  /* Nunca captura clics, ni siquiera mientras cubre la página: así no deja
+     nada atrapado detrás ni intercepta nada una vez se ha retirado. */
+  pointer-events: none;
+  animation: preloader-lift 2.05s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+
+html.js .preloader-name {
+  display: block;
+  overflow: hidden;
+}
+
+html.js .preloader-name-inner {
+  display: block;
+  animation: preloader-name 2.05s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+html.js .preloader-bar {
+  width: min(180px, 42vw);
+  height: 2px;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--foreground) 14%, transparent);
+}
+
+html.js .preloader-bar-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  background: var(--color-red-500);
+  animation: preloader-bar 2.05s linear both;
+}
+
+/* 110% y no 100%: deja margen para tildes y descendentes, que con 100% asoman
+   por el borde de la máscara. */
+@keyframes preloader-name {
+  0% {
+    transform: translateY(110%);
+  }
+
+  10% {
+    transform: translateY(0);
+  }
+
+  73% {
+    transform: translateY(0);
+  }
+
+  84% {
+    transform: translateY(-110%);
+  }
+
+  100% {
+    transform: translateY(-110%);
+  }
+}
+
+@keyframes preloader-bar {
+  0%,
+  10% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+
+  73% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+
+  82%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+/* inset(0 0 100% 0): el recorte se cierra contra el borde superior, así que la
+   página se descubre de abajo arriba, como una persiana que sube. */
+@keyframes preloader-lift {
+  0%,
+  84% {
+    clip-path: inset(0 0 0 0);
+    visibility: visible;
+  }
+
+  100% {
+    clip-path: inset(0 0 100% 0);
+    visibility: hidden;
+  }
+}
+
+/* La entrada del hero espera a que la cortina levante; si no, ocurriría entera
+   por detrás y no se vería. */
+html.js {
+  --enter-offset: 1.78s;
+}

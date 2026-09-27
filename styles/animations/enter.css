@@ -1,0 +1,119 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Animaciones de entrada
+
+   Todas cuelgan de `html.js`, la clase que pone components/theme-script.tsx
+   antes del primer pintado. Sin JavaScript no se aplica ninguna y el
+   contenido se ve tal cual, en vez de quedarse en opacity 0 esperando a un
+   script que no va a llegar (era el caso con framer-motion: el HTML servido
+   traía style="opacity:0" en cada bloque).
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* 140px y no 56px: solo las usa el nombre del hero (enter-name), donde el
+   recorrido grande es intencional para que la entrada se note con claridad. */
+@keyframes enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(140px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes enter-down {
+  from {
+    opacity: 0;
+    transform: translateY(-140px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes enter-left {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes enter-right {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes enter-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* `both` deja aplicado el fotograma inicial durante el animation-delay: sin
+   él, los elementos con retardo parpadean visibles antes de empezar.
+
+   El retardo se parte en dos: `--enter-delay` es el escalonado propio de cada
+   elemento (lo pone el componente) y `--enter-offset` es la espera común a
+   toda la secuencia, que existe para que la entrada no ocurra detrás de la
+   cortina de carga. La declaración va DESPUÉS del atajo `animation`, que si no
+   resetearía animation-delay a 0. */
+html.js .enter {
+  animation: enter-fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--enter-offset, 0s) + var(--enter-delay, 0s));
+}
+
+html.js .enter-up {
+  animation-name: enter-up;
+}
+
+html.js .enter-down {
+  animation-name: enter-down;
+}
+
+html.js .enter-left {
+  animation-name: enter-left;
+}
+
+html.js .enter-right {
+  animation-name: enter-right;
+}
+
+/* El nombre del hero: entrada más larga y con una curva menos brusca que el
+   resto de la secuencia, porque es lo primero que se mira. 1s y no 0.8s: con
+   el recorrido de 140px hace falta un pelín más de tiempo para que se lea
+   como un movimiento deliberado y no como un tirón. */
+html.js .enter-name {
+  animation-duration: 1s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Scroll reveal de las secciones (components/reveal.tsx): el observer marca
+   data-revealed la primera vez que el bloque entra en el viewport. */
+html.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.6s ease-out,
+    transform 0.6s ease-out;
+}
+
+html.js [data-reveal][data-revealed] {
+  opacity: 1;
+  transform: none;
+}
