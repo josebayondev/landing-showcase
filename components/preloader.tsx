@@ -2,7 +2,7 @@
 // se llena y la cortina se retira hacia arriba dejando ver la web.
 //
 // Server component y cero JavaScript: toda la secuencia son keyframes CSS
-// (globals.css, bloque "Cortina de carga"). La cortina está en `display: none`
+// (styles/animations/preloader.css). La cortina está en `display: none`
 // por defecto y solo se muestra bajo `html.js`, así que si el script no llega
 // no hay pantalla negra permanente: se ve la web directamente.
 //

@@ -2,7 +2,7 @@
 // tema guardado, para que no haya parpadeo ni de animaciones ni de color.
 const THEME_SCRIPT = `
 (function () {
-  // Las animaciones de entrada de globals.css cuelgan de .js: sin esta clase
+  // Las animaciones de entrada de styles/animations/ cuelgan de .js: sin esta clase
   // el contenido se ve sin animar en vez de quedarse invisible.
   document.documentElement.classList.add("js");
   try {

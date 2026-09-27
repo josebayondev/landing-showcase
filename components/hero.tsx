@@ -5,7 +5,7 @@ const BADGES = [
   { label: "Madrid, España", dot: false, delay: "0.8s" },
 ];
 
-// Server component: la entrada es CSS (clases .enter de globals.css), no hay
+// Server component: la entrada es CSS (clases .enter de styles/animations/enter.css), no hay
 // estado ni animación en JavaScript, así que no necesita "use client".
 //
 // `hero-scroll` va en la propia sección, no en el wrapper `.pin-wrapper`: las
@@ -20,17 +20,17 @@ const BADGES = [
 //
 // Los retardos van en `--enter-delay` y no en `animationDelay`: la regla
 // `.enter` los suma a `--enter-offset`, la espera común mientras la cortina de
-// carga está delante (globals.css). Con `animationDelay` inline no habría
+// carga está delante (styles/animations/preloader.css). Con `animationDelay` inline no habría
 // forma de sumar las dos cosas.
 //
-// `.pin-wrapper`/`.pin-sticky`/`.pin-reveal` (globals.css, dentro de
+// `.pin-wrapper`/`.pin-sticky`/`.pin-reveal` (styles/animations/scroll.css, dentro de
 // @supports animation-timeline; patrón reutilizable, también lo usan los
 // títulos de Proyectos y Sobre mí vía `SectionTitle`) anclan la sección en su
 // sitio durante un tramo de scroll extra, para que mientras se revela "Bayón"
 // no se mueva nada más. Solo esa línea reacciona al scroll durante ese tramo;
 // el resto (Jose Ignacio, rol, bio, badges) se queda fijo. Cuando termina, el
 // scroll se libera y toda la sección (incluida ya "Bayón", asentada) se
-// desvanece junta al alejarse (`hero-exit`, en globals.css). Fuera del
+// desvanece junta al alejarse (`hero-exit`, en styles/animations/scroll.css). Fuera del
 // @supports (o sin JS, o con prefers-reduced-motion) no hay wrapper ni scroll
 // clavado: la página fluye normal y "Bayón" entra en la carga con `enter-up`,
 // nunca se queda invisible para siempre.

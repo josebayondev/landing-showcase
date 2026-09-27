@@ -44,7 +44,9 @@ CI (`.github/workflows/ci.yml`) depende de este orden.
 
 - Next.js 16 (App Router, Turbopack) + React 19 + Tailwind CSS v4 + TypeScript. Sin `tailwind.config.js`:
   la configuración de Tailwind v4 es CSS-first, vive en `app/globals.css` (`@import "tailwindcss"`, bloques
-  `@theme`).
+  `@theme`, variantes y utilidades propias). El resto del CSS está partido por dominio en `styles/`
+  (`base.css` y `animations/{enter,preloader,scroll,reduced-motion}.css`), importado desde `globals.css`;
+  el orden de esos `@import` importa (reduced motion va el último).
 - Alias de imports `@/*` → raíz del repo (ver `tsconfig.json`), p. ej. `@/components/navbar`.
 - Componentes en `components/` en plano (sin subcarpetas `ui/`, `sections/`, etc. todavía) — un fichero por
   componente, exports con nombre (no default).
@@ -72,7 +74,8 @@ El tema oscuro se controla por la clase `.dark` en `<html>`, no por media query.
 
 ### Animaciones (CSS, no framer-motion)
 
-Las entradas del hero y el scroll reveal de las secciones son **CSS puro**, definido en `app/globals.css`:
+Las entradas del hero y el scroll reveal de las secciones son **CSS puro**, definido en
+`styles/animations/enter.css`:
 
 - `.enter` (+ `.enter-up`, `.enter-down`, `.enter-left`, `.enter-right`, `.enter-name`) para la entrada del
   hero al cargar. El escalonado se pasa con `style={{ animationDelay }}` desde el componente, no con más
@@ -86,7 +89,8 @@ framer-motion el HTML que salía del servidor traía `style="opacity:0"` en cada
 JS la página era un rectángulo vacío y el LCP esperaba a la hidratación. Cualquier animación nueva que empiece
 en estado invisible debe seguir la misma regla.
 
-Antes de todo eso está la **cortina de carga** (`components/preloader.tsx`), otra secuencia de CSS puro de
+Antes de todo eso está la **cortina de carga** (`components/preloader.tsx`, estilos en
+`styles/animations/preloader.css`), otra secuencia de CSS puro de
 2.05s: el nombre entra recortado por una máscara, la barra roja se llena y la cortina se retira hacia arriba
 con `clip-path`. Dos consecuencias que hay que tener presentes al tocarla:
 
@@ -102,15 +106,27 @@ con `clip-path`. Dos consecuencias que hay que tener presentes al tocarla:
 Contrapartida asumida a propósito: dos segundos de cortina opaca retrasan el LCP, justo la métrica por la
 que se migró desde framer-motion. Fue una decisión consciente de Jose, no un descuido.
 
-Hay además una segunda capa, **ligada al scroll** y también en `app/globals.css`, que usa
-`animation-timeline` (CSS scroll-driven, sin JavaScript):
+Hay además una segunda capa, **ligada al scroll**, que usa `animation-timeline` (CSS scroll-driven, sin
+JavaScript). Se reparte así:
+
+- **Coreografía con excepciones** (scroll clavado `.pin-*` del hero y de los títulos, `.hero-scroll`) en
+  `styles/animations/scroll.css`, como clases con sus comentarios.
+- **Efectos de un solo elemento** como utilidades de Tailwind en el propio JSX, con la variante
+  `scroll-driven:` (definida en `app/globals.css`), que envuelve en
+  `@media (prefers-reduced-motion: no-preference)` + `@supports (animation-timeline: view())` + `html.js`.
+  Sus keyframes están en `@theme` (`animate-word-in`, `animate-title-settle`, `animate-glyph-fill`) y hay
+  dos utilidades propias porque Tailwind no las trae: `timeline-view` y `range-[...]` (con `_` en lugar de
+  espacios). El orden en el CSS generado es `animate-*` → `range-*` → `timeline-view`, y tiene que
+  seguir así: el atajo `animation` resetea `animation-timeline` y `animation-range`.
+
+Piezas concretas:
 
 - `.hero-scroll` en la sección del hero: se aparta un poco más rápido que el scroll y se apaga al salir.
   Va sobre `scroll(root block)` y no sobre `view()` porque el hero arranca pegado al origen del documento,
   así el recorrido es la primera pantalla y no depende de cuánto asoma el bloque. La clase va en la propia
   `<section>`: las clases `.enter` están en los descendientes, así que no compiten por el mismo elemento, y
   envolver los hijos rompería el flex y la posición absoluta de los badges.
-- `[data-scroll-text] > span` para `components/scroll-text.tsx`, que parte un párrafo en palabras. Cada
+- `scroll-driven:*:` sobre el `<p>` de `components/scroll-text.tsx`, que parte un párrafo en palabras. Cada
   `<span>` tiene su propia `view()` timeline, así que se enciende según su posición: las palabras de una
   misma línea comparten altura y entran juntas, con lo que se lee **línea a línea**. No hay retardos
   calculados ni componente cliente.
@@ -120,8 +136,10 @@ así que **todo lo que arranque atenuado va dentro de `@supports (animation-time
 soporte ve el contenido a opacidad normal y quieto — la misma regla que el gate `html.js`, por el mismo
 motivo: nada puede quedarse invisible esperando algo que no va a llegar.
 
-`@media (prefers-reduced-motion: reduce)` desactiva marquee, entradas, reveals, el parallax del hero y el
-revelado por scroll, además del scroll suave. Hay que mantenerlo al añadir animaciones.
+`@media (prefers-reduced-motion: reduce)` (`styles/animations/reduced-motion.css`) desactiva marquee,
+entradas, reveals, el parallax del hero y el scroll clavado, además del scroll suave. Hay que mantenerlo al
+añadir animaciones con clases. Las utilidades con `scroll-driven:` no hace falta añadirlas: la variante ya
+excluye reduced motion.
 
 Tras esta migración **framer-motion ya no se importa en ningún sitio**; sigue en `package.json` por si vuelve
 a hacer falta, pero se puede desinstalar.

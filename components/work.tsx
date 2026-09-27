@@ -17,7 +17,7 @@ const PROJECTS = [
 export function Work() {
   return (
     <section id="work" className="px-6 py-8 sm:px-12">
-      {/* Scroll clavado (ver components/hero.tsx y globals.css): la sección
+      {/* Scroll clavado (ver components/hero.tsx y styles/animations/scroll.css): la sección
           se ancla brevemente mientras "Proyectos" sube y se asienta, antes de
           soltar el scroll para las tarjetas de abajo. items-end y no
           items-center: con el título centrado quedaba medio scroll vacío por

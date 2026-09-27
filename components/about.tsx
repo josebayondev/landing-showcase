@@ -37,7 +37,7 @@ const JOBS = [
 export function About() {
   return (
     <section id="about" className="px-6 py-8 sm:px-12">
-      {/* Scroll clavado (ver components/hero.tsx y globals.css): la sección
+      {/* Scroll clavado (ver components/hero.tsx y styles/animations/scroll.css): la sección
           se ancla brevemente mientras "Sobre mí" sube y se asienta, antes de
           soltar el scroll para la bio y los puestos de abajo. items-end y no
           items-center: con el título centrado quedaba medio scroll vacío por

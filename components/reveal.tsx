@@ -12,7 +12,7 @@ type RevealProps = {
 // Wrapper reutilizable para el scroll reveal de secciones: se anima la primera
 // vez que entra en el viewport y se queda así (el observer se desconecta).
 //
-// La animación vive en globals.css bajo `html.js [data-reveal]`; aquí solo se
+// La animación vive en styles/animations/enter.css bajo `html.js [data-reveal]`; aquí solo se
 // marca `data-revealed`. Así el HTML que llega del servidor no trae opacity 0
 // y la página se lee entera aunque el JavaScript no llegue a ejecutarse.
 export function Reveal({ children, delay = 0, className }: RevealProps) {
