@@ -19,21 +19,21 @@ export function Work() {
     <section id="work" className="px-6 pt-[20dvh] pb-8 sm:px-12">
       {/* Scroll clavado (ver components/hero.tsx y styles/animations/scroll.css): la sección
           se ancla brevemente mientras "Proyectos" sube y se asienta, antes de
-          soltar el scroll para las tarjetas de abajo. items-end y no
-          items-center: con el título centrado quedaba medio scroll vacío por
+          soltar el scroll para las tarjetas de abajo. Título y línea pegados
+          abajo (justify-end) y no centrados: con el título centrado quedaba medio scroll vacío por
           debajo antes de llegar a las tarjetas; pegado abajo, en cuanto se
           suelta el anclaje viene enseguida el contenido. */}
       <div className="pin-wrapper pin-wrapper--section">
-        <div className="pin-sticky flex min-h-[28dvh] items-end pb-4">
+        <div className="pin-sticky flex min-h-[28dvh] flex-col justify-end">
           <Reveal>
             <SectionTitle pinReveal>Proyectos</SectionTitle>
           </Reveal>
+          {/* La línea va dentro del bloque clavado, no después, y sin
+              <Reveal>: en los dos casos se movía hacia el título mientras
+              este estaba quieto. */}
+          <div className="mt-8 border-t border-black/10 dark:border-white/10" />
         </div>
       </div>
-
-      <Reveal delay={0.1}>
-        <div className="mt-4 border-t border-black/10 dark:border-white/10" />
-      </Reveal>
 
       <div className="mt-8 flex flex-col gap-6">
         {PROJECTS.map((project, index) => (

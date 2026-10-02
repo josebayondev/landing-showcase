@@ -6,8 +6,8 @@ import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const NAV_LINKS = [
-  { href: "#work", label: "Proyectos" },
   { href: "#about", label: "Sobre mí" },
+  { href: "#work", label: "Proyectos" },
   { href: "#contact", label: "Contacto" },
 ];
 

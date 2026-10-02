@@ -39,21 +39,21 @@ export function About() {
     <section id="about" className="px-6 pt-[20dvh] pb-8 sm:px-12">
       {/* Scroll clavado (ver components/hero.tsx y styles/animations/scroll.css): la sección
           se ancla brevemente mientras "Sobre mí" sube y se asienta, antes de
-          soltar el scroll para la bio y los puestos de abajo. items-end y no
-          items-center: con el título centrado quedaba medio scroll vacío por
+          soltar el scroll para la bio y los puestos de abajo. Título y línea
+          pegados abajo (justify-end) y no centrados: con el título centrado quedaba medio scroll vacío por
           debajo antes de llegar al contenido; pegado abajo, en cuanto se
           suelta el anclaje viene enseguida. */}
       <div className="pin-wrapper pin-wrapper--section">
-        <div className="pin-sticky flex min-h-[28dvh] items-end pb-4">
+        <div className="pin-sticky flex min-h-[28dvh] flex-col justify-end">
           <Reveal>
             <SectionTitle pinReveal>Sobre mí</SectionTitle>
           </Reveal>
+          {/* La línea va dentro del bloque clavado, no después, y sin
+              <Reveal>: en los dos casos se movía hacia el título mientras
+              este estaba quieto. */}
+          <div className="mt-8 border-t border-black/10 dark:border-white/10" />
         </div>
       </div>
-
-      <Reveal delay={0.1}>
-        <div className="mt-4 border-t border-black/10 dark:border-white/10" />
-      </Reveal>
 
       <div className="mt-8 grid gap-12 md:grid-cols-2 md:gap-16">
         <ScrollText
