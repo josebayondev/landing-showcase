@@ -36,7 +36,7 @@ const JOBS = [
 
 export function About() {
   return (
-    <section id="about" className="px-6 py-8 sm:px-12">
+    <section id="about" className="px-6 pt-[20dvh] pb-8 sm:px-12">
       {/* Scroll clavado (ver components/hero.tsx y styles/animations/scroll.css): la sección
           se ancla brevemente mientras "Sobre mí" sube y se asienta, antes de
           soltar el scroll para la bio y los puestos de abajo. items-end y no
@@ -44,7 +44,7 @@ export function About() {
           debajo antes de llegar al contenido; pegado abajo, en cuanto se
           suelta el anclaje viene enseguida. */}
       <div className="pin-wrapper pin-wrapper--section">
-        <div className="pin-sticky flex min-h-[28dvh] items-end pb-8">
+        <div className="pin-sticky flex min-h-[28dvh] items-end pb-4">
           <Reveal>
             <SectionTitle pinReveal>Sobre mí</SectionTitle>
           </Reveal>
@@ -52,10 +52,10 @@ export function About() {
       </div>
 
       <Reveal delay={0.1}>
-        <div className="mt-8 border-t border-black/10 dark:border-white/10" />
+        <div className="mt-4 border-t border-black/10 dark:border-white/10" />
       </Reveal>
 
-      <div className="mt-12 grid gap-12 md:grid-cols-2 md:gap-16">
+      <div className="mt-8 grid gap-12 md:grid-cols-2 md:gap-16">
         <ScrollText
           text={BIO}
           className="max-w-md font-mono text-xs text-zinc-600 sm:text-sm dark:text-zinc-400"
