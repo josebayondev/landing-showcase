@@ -17,24 +17,25 @@
    ───────────────────────────────────────────────────────────────────────── */
 
 /* El hero se desvanece y se aparta al alejarse, ya con el scroll clavado
-   liberado (`.pin-wrapper`/`exit`, más abajo): el rango usa la fase "exit" del
-   timeline con nombre, que solo arranca cuando el wrapper empieza a irse de
-   verdad, para que nada de esto se mezcle con la revelación de "Bayón". La
-   opacidad aguanta hasta el 45% del recorrido para que no se vea lavado nada
-   más soltarse. */
+   liberado (ver `.hero-scroll` más abajo). El desplazamiento es pequeño
+   (-6%, antes -18%): con más, el hero se iba bastante más rápido que el
+   scroll y el movimiento mareaba. La opacidad aguanta hasta el 30% para que
+   no se vea lavado nada más soltarse, y no llega a 0 hasta que el bloque ya
+   casi ha salido de pantalla: antes se apagaba entero mientras aún ocupaba
+   media pantalla y dejaba un hueco en blanco. */
 @keyframes hero-exit {
   0% {
     opacity: 1;
     transform: none;
   }
 
-  45% {
+  30% {
     opacity: 1;
   }
 
   100% {
     opacity: 0;
-    transform: translateY(-18%);
+    transform: translateY(-6%);
   }
 }
 
@@ -44,17 +45,19 @@
    abajo) — en los títulos de sección ese asentado desplazaba el título hacia
    arriba justo después de anclarlo abajo, reabriendo el hueco con el
    contenido que ese anclaje quería evitar. */
+/* Recorridos suaves a propósito (60px y escala 1.08; antes 140px y 1.15):
+   con más, el salto se notaba brusco y podía marear. */
 @keyframes pin-reveal-up {
   from {
     opacity: 0;
-    transform: translateY(140px);
+    transform: translateY(60px);
   }
   60% {
     opacity: 1;
     transform: none;
   }
   100% {
-    transform: scale(1.15) translateY(-14%);
+    transform: scale(1.08) translateY(-6%);
   }
 }
 
@@ -66,7 +69,7 @@
 @keyframes pin-reveal-settle {
   from {
     opacity: 0;
-    transform: translateY(140px);
+    transform: translateY(48px);
   }
   to {
     opacity: 1;
@@ -119,12 +122,13 @@
     height: calc(190dvh - 6rem);
   }
 
-  /* 46dvh (antes 38dvh): sticky de 28dvh (ver components/work.tsx y
-     about.tsx) + 18dvh de scroll clavado extra — más corto que el hero porque
-     aquí solo se revela una línea de título, no dos, pero con dwell de sobra
-     para que el título se note quieto antes de soltar. */
+  /* 34dvh (antes 46dvh): sticky de 28dvh (ver components/work.tsx y
+     about.tsx) + 6dvh de scroll clavado extra. Ese extra es también hueco
+     entre el título y su contenido, y con 18dvh el contenido quedaba
+     demasiado lejos; la separación se lleva ahora antes de la sección
+     (pt-[20dvh] en work.tsx y about.tsx), no después del título. */
   html.js .pin-wrapper--section {
-    height: 46dvh;
+    height: 34dvh;
   }
 
   html.js .pin-sticky {
@@ -139,14 +143,16 @@
      ya nace parcialmente dentro de su fase "contain" en scrollY: 0, así que
      "Bayón" empezaría a revelarse sin haber hecho scroll. Con `scroll(root
      block)` no pasa, porque mide scroll absoluto y no la posición del propio
-     bloque. Arranca en 90vh (antes 70vh, antes 35vh), justo donde termina el
-     tramo clavado (90dvh de `.pin-wrapper--hero`) tras el reveal de "Bayón" y
-     su pausa quieta, y no antes: mientras la sección está anclada no debe
-     pasar nada más. */
+     bloque. Arranca en 90vh, justo donde termina el tramo clavado (90dvh de
+     `.pin-wrapper--hero`) tras el reveal de "Bayón" y su pausa quieta, y no
+     antes: mientras la sección está anclada no debe pasar nada más. Acaba en
+     160vh (antes 110vh): el fundido acompaña al hero mientras sale de
+     pantalla, en vez de apagarlo de golpe con él todavía delante. Curva
+     ease-in para que el movimiento empiece suave al soltarse el anclaje. */
   html.js .hero-scroll {
-    animation: hero-exit linear both;
+    animation: hero-exit cubic-bezier(0.32, 0, 0.67, 0) both;
     animation-timeline: scroll(root block);
-    animation-range: 90vh 110vh;
+    animation-range: 90vh 160vh;
   }
 
   /* Mismo motivo que arriba: "Bayón" usa scroll absoluto, no el timeline con
@@ -160,23 +166,36 @@
      títulos de sección. */
   html.js .hero-scroll .pin-reveal {
     animation-name: pin-reveal-up;
+    animation-timing-function: ease-in-out;
     animation-timeline: scroll(root block);
     animation-range: 0 45vh;
   }
 
-  /* El título/línea que se revela durante el tramo clavado: se agota al 92%
-     de ese tramo (contain 0% a contain 92%, antes 85%, antes 60%: se pidió
-     más de una vez notar la revelación más despacio al hacer scroll), así
-     que queda ya asentado un momento antes de que el scroll se libere, en vez
-     de terminar justo cuando se suelta. Sin asentado de escala
+  /* El título que se revela al llegar a su sección. Rango cover 15% → cover
+     50% (antes contain 0% → contain 92%): empieza en cuanto el título asoma
+     por abajo y está entero al llegar a media pantalla. Con el rango
+     anterior el título seguía invisible mientras ya estaba en pantalla, y
+     junto con el fundido del hero dejaba frames casi en blanco. Curva
+     ease-out: frena al asentarse en vez de pararse en seco. Sin asentado de
+     escala
      (pin-reveal-settle, no pin-reveal-up): aquí el título ya está anclado al
      fondo del bloque, y ese desplazamiento lo alejaría del contenido de
      debajo otra vez. La regla `.hero-scroll .pin-reveal` de arriba, más
      específica, pisa esto para "Bayón" en el hero (ver el porqué ahí). */
   html.js .pin-reveal {
     transform-origin: left center;
-    animation: pin-reveal-settle linear both;
+    animation: pin-reveal-settle cubic-bezier(0.33, 1, 0.68, 1) both;
     animation-timeline: --pin-progress;
-    animation-range: contain 0% contain 92%;
+    animation-range: cover 15% cover 50%;
+  }
+
+  /* Los títulos con .pin-reveal van envueltos en <Reveal>, que solo hace
+     falta como fallback sin animation-timeline. Aquí lo neutralizamos: si
+     no, su fundido (que espera a que el bloque suba un 20% del viewport) se
+     encadena con el de .pin-reveal y el título tarda el doble en verse. */
+  html.js [data-reveal]:has(> .pin-reveal) {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
